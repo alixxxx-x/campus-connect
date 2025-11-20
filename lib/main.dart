@@ -27,21 +27,21 @@ class LoginPage extends StatelessWidget {
         child: Stack(
           children: <Widget>[
             Positioned(
-                top: 200,
-                left: 59,
+                top: 120,
+                left: 30,
                 child: Container(
                   child: Text(
                     'Login',
                     style: TextStyle(
-                        fontSize: 48,
+                        fontSize: 68,
                         fontFamily: 'Poppins-Medium',
                         fontWeight: FontWeight.w500,
                         color: Colors.white),
                   ),
                 )),
-            Positioned(top: 290, right: 0, bottom: 0, child: LayerOne()),
-            Positioned(top: 318, right: 0, bottom: 28, child: LayerTwo()),
-            Positioned(top: 320, right: 0, bottom: 38, child: LayerThree()),
+            Positioned(top: 210, right: 0, bottom: 0, child: LayerOne()),
+            Positioned(top: 238, right: 0, bottom: 28, child: LayerTwo()),
+            Positioned(top: 240, right: 0, bottom: 38, child: LayerThree()),
           ],
         ),
       ),

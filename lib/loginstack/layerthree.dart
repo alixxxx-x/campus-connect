@@ -24,9 +24,6 @@ final scale = w / baseWidth;
 final containerHeight = 584.0 * scale;
 
 return SizedBox(
-   width: w,
-   child: SingleChildScrollView(
-       child: SizedBox(
          height: containerHeight,
 width: w,
 child: Stack(
@@ -34,7 +31,7 @@ fit: StackFit.expand,
 children: <Widget>[
   // Username Label
     Positioned(
-left: 59 * scale,
+left: 35 * scale,
 top: 99 * scale,
 child: Text(
 'Username',
@@ -47,7 +44,7 @@ fontWeight: FontWeight.w500,
 ),
 // Username TextField
 Positioned(
-left: 59 * scale,
+left: 35 * scale,
 top: 129 * scale,
 child: Container(
 width: 310 * scale,
@@ -62,7 +59,7 @@ hintStyle: TextStyle(color: hintText, fontSize: 14 * scale),
 ),
 // Password Label
 Positioned(
-left: 59 * scale,
+left: 35 * scale,
 top: 199 * scale,
 child: Text(
 'Password',
@@ -75,7 +72,7 @@ fontWeight: FontWeight.w500,
 ),
 // Password TextField
 Positioned(
-left: 59 * scale,
+left: 35 * scale,
 top: 229 * scale,
 child: Container(
 width: 310 * scale,
@@ -91,7 +88,7 @@ hintStyle: TextStyle(color: hintText, fontSize: 14 * scale),
 ),
 //Sign up link
 Positioned(
-right: 60 * scale,
+right: 40 * scale,
 top: 296 * scale,
 child: Text(
 'Sign Up',
@@ -105,7 +102,7 @@ fontWeight: FontWeight.w600,
 ),
 // Remember Me checkbox
 Positioned(
-left: 46 * scale,
+left: 22 * scale,
 top: 361 * scale,
 child: Checkbox(
 checkColor: Colors.white,
@@ -120,7 +117,7 @@ isChecked = value ?? false;
 ),
 // Remember Me text
 Positioned(
-left: 87 * scale,
+left: 63 * scale,
 top: 375 * scale,
 child: Text(
 'Remember Me',
@@ -135,7 +132,7 @@ fontWeight: FontWeight.w500,
 // Sign In button
 Positioned(
 top: 365 * scale,
-right: 60 * scale,
+right: 40 * scale,
 child: Container(
 width: 99 * scale,
 height: 35 * scale,
@@ -159,70 +156,10 @@ fontWeight: FontWeight.w400,
 ),
 ),
 ),
-// horizontal divider line
-Positioned(
-top: 432 * scale,
-left: 59 * scale,
-child: Container(
-height: 0.5 * scale,
-width: 310 * scale,
-color: inputBorder,
-),
-),
-// sign in with google or apple account
-Positioned(
-top: 462 * scale,
-left: 120 * scale,
-right: 120 * scale,
-child: Row(
-mainAxisAlignment: MainAxisAlignment.spaceBetween,
-children: <Widget>[
-Container(
-width: 59 * scale,
-height: 48 * scale,
-decoration: BoxDecoration(
-border: Border.all(color: signInBox),
-borderRadius: BorderRadius.only(
-topLeft: Radius.circular(20 * scale),
-bottomRight: Radius.circular(20 * scale),
-),
-),
-child: Image.asset(
-'images/icon_google.png',
-width: 20 * scale,
-height: 21 * scale,
-),
-),
-Text(
-'or',
-style: TextStyle(
-fontSize: 18 * scale,
-fontFamily: 'Poppins-Regular',
-color: Colors.black,
-),
-),
-Container(
-width: 59 * scale,
-height: 48 * scale,
-decoration: BoxDecoration(
-border: Border.all(color: signInBox),
-borderRadius: BorderRadius.only(
-topLeft: Radius.circular(20 * scale),
-bottomRight: Radius.circular(20 * scale),
-),
-),
-    child: Image.asset('images/icon_apple.png',
-           width: 20 * scale,
-          height: 21 * scale,
-    ),
-),
-],
-),
-),
+
+
                    ],
                  ),
-               ),
-            ),
           );
        }
   }
