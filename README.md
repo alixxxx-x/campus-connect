@@ -1,45 +1,130 @@
-# Campus Connect
+# Campus Connect – A Student Utility App
 
-Campus Connect is a campus-oriented application designed to facilitate communication and access to essential university services. The goal of this project is to provide students with a centralized platform where they can stay informed, interact with campus resources, and manage academic-related information more efficiently.
+## Unit
+DAM  
+Academic Year: 2025–2026  
 
-This project was developed as part of an academic initiative to apply full-stack development concepts in a real-world scenario.
+## Project Title
+Campus Connect – A Student Utility App
 
 ---
 
-## Features
+## Project Description
 
-- User authentication (login and registration)
-- Student profile management
-- Access to campus announcements and updates
-- Communication between students and campus administration
-- Centralized access to academic or campus-related information
-- Simple and intuitive user interface
+Campus Connect is a Flutter-based mobile application designed to streamline student life on campus.  
+The application provides a centralized platform that allows students, teachers, and administrators to interact through a single system.
+
+The app includes features such as class schedules, exam notifications, a digital student ID card, course management, attendance tracking, file sharing, and peer-to-peer communication.  
+All actors use the same application and login page, with role-based access and predefined accounts for administrators and teachers.
+
+---
+
+## Actors and Roles
+
+The application supports three main actors:
+
+### Admin
+- Manage student registrations (accept or reject new accounts)
+- Assign students and teachers to groups
+- Assign courses to teachers and student groups
+- Delete student accounts
+- Upload schedules, timetables, and files (images or documents)
+- Manage overall system data
+
+### Teacher
+- Access assigned courses and groups
+- Upload course-related files
+- Enter and modify student marks
+- Mark weekly attendance for students in their groups
+
+### Student
+- Register for an account (registration must be validated by an admin)
+- View and edit personal profile information
+- Access a digital student card
+- View group schedules and timetables
+- Check marks per course
+- Access course files uploaded by teachers or admins
+
+---
+
+## Functional Requirements
+
+- Single application and login page for all actors
+- Role-based access control (Admin, Teacher, Student)
+- Predefined admin accounts
+- At least two predefined teacher accounts
+- Predefined courses and student groups
+- Admin validation required for new student registrations
 
 ---
 
 ## Technologies Used
 
-### Frontend
-- Flutter 
-
-### Backend
-- Django / Django REST Framework 
-
-### Database
-- PostgreSQL 
-
-### Tools
-- Git and GitHub
-- Visual Studio Code / Android Studio
-
+- Flutter framework for mobile application development
+- Database:
+  - Any database type may be used (SQL, NoSQL, Firebase, etc.)
+  - SQLite is not allowed
+- REST API with SQL database connection is recommended and better graded
 
 ---
 
-## Project Structure
+## Project Sprints and Evaluation
 
-```text
-campus-connect/
-├── frontend/        # Client-side application
-├── backend/         # Server-side logic and API
-├── README.md
-└── requirements.txt
+The project is evaluated as part of the DAM TP and counts for **11/20 of the total TP mark**.  
+Each sprint has a separate mark.
+
+### Sprint 1: Frontend and UI (3 points)
+- Design a user-friendly interface for each actor
+- Design a student card containing student information
+- Design a login page
+- Design a home page for each actor
+
+### Sprint 2: Functions (2.5 points)
+- Fully functional admin panel:
+  - Manage student registrations
+  - Assign groups and courses
+  - Upload timetables and schedules
+  - Manage teachers (assign groups and courses)
+- Student pages:
+  - View group information
+  - View marks
+  - View timetables
+  - Access course files
+- Teacher pages:
+  - View assigned courses
+  - Upload and view course files
+  - Modify student marks
+
+### Sprint 3: Backend (2.5 points)
+- User registration and authentication using a database
+- Save and retrieve data from the database
+- Modify database data through the application
+- Upload images/files to the server
+- Partial implementation of database tables is accepted for partial grading
+
+### Sprint 4: Enhanced Search and Responsive Design (1 point)
+- Improve search functionality
+- Ensure responsive design across different screen sizes
+
+---
+
+## Project Objectives
+
+- Simplify campus life for students
+- Centralize academic information and communication
+- Provide a practical application of Flutter development
+- Apply backend integration using databases and REST APIs
+
+---
+
+## Author
+
+Alix
+Bassem
+Computer Science Student
+
+---
+
+## License
+
+This project is developed for educational purposes as part of the DAM unit.
