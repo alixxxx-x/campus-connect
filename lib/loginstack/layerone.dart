@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:campus_connect_app_login/config.dart';
 
 class LayerOne extends StatelessWidget {
+  const LayerOne({super.key});
+
   @override
   Widget build(BuildContext context) {
     return Container(

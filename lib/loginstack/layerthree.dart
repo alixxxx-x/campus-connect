@@ -163,23 +163,23 @@ fontWeight: FontWeight.w400,
           );
        }
   }
-class stdCard extends StatelessWidget {
-  String name;
-  int stdId;
-  String btdate;
-  String photo;
-  String Specialte;
-  String Branche;
-  int section;
-  int groupe;
+class StdCard extends StatelessWidget {
+  final String name;
+  final int stdId;
+  final String btdate;
+  final String photo;
+  final String specialte;
+  final String branche;
+  final int section;
+  final int groupe;
 
-  stdCard({
+  const StdCard({
     required this.name,
     required this.stdId,
     required this.btdate,
     required this.photo,
-    required this.Specialte,
-    required this.Branche,
+    required this.specialte,
+    required this.branche,
     required this.section,
     required this.groupe,
   });
@@ -216,8 +216,8 @@ class stdCard extends StatelessWidget {
                       ),
                       _buildInfoRow("ID:", stdId.toString()),
                       _buildInfoRow("Date de naissance:", btdate),
-                      _buildInfoRow("Spécialité:", Specialte),
-                      _buildInfoRow("Branche:", Branche),
+                      _buildInfoRow("Spécialité:", specialte),
+                      _buildInfoRow("Branche:", branche),
                       _buildInfoRow("Section:", section.toString()),
                       _buildInfoRow("Groupe:", groupe.toString()),
                     ],
