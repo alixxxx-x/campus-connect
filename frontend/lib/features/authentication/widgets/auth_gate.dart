@@ -1,34 +1,44 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../admin/screens/admin_home_screen.dart';
-import '../../teacher/screens/teacher_home_screen.dart';
-import '../../student/screens/student_home_screen.dart';
+
+import '../services/auth_service.dart';
 import '../screens/login_screen.dart';
-import '../services/auth_service.dart'; // your AuthService
+
+import '../../actors/admin/screens/admin_home_screen.dart';
+import '../../actors/teacher/screens/teacher_home_screen.dart';
+import '../../actors/student/screens/student_home_screen.dart';
 
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // Example using your AuthService
-    final authService = ref.watch(authServiceProvider);
-    final isLoggedIn = authService.isLoggedIn;
-    final role = authService.userRole; // 'admin', 'teacher', 'student'
+    final auth = ref.watch(authServiceProvider);
 
-    if (!isLoggedIn) {
-      return const LoginScreen();
-    }
+    return FutureBuilder(
+      future: auth.loadFromStorage(),
+      builder: (context, snapshot) {
+        if (snapshot.connectionState == ConnectionState.waiting) {
+          return const Scaffold(
+            body: Center(child: CircularProgressIndicator()),
+          );
+        }
 
-    switch (role) {
-      case 'admin':
-        return const AdminHomeScreen();
-      case 'teacher':
-        return const TeacherHomeScreen();
-      case 'student':
-        return const StudentHomeScreen();
-      default:
-        return const LoginScreen();
-    }
+        if (!auth.isLoggedIn) {
+          return const LoginScreen();
+        }
+
+        switch (auth.userRole) {
+          case 'admin':
+            return AdminHomeScreen();
+          case 'teacher':
+            return TeacherHomeScreen();
+          case 'student':
+            return StudentHomeScreen();
+          default:
+            return LoginScreen();
+        }
+      },
+    );
   }
 }
