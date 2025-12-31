@@ -10,7 +10,7 @@ class CampusConnectApp extends StatelessWidget {
     return MaterialApp(
       title: 'Campus Connect',
       debugShowCheckedModeBanner: false,
-      home: const AuthGate(), // automatically navigates based on role
+      home: const AuthGate(), // navigates to a homescreen based on role
     );
   }
 }
