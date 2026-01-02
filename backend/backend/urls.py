@@ -1,22 +1,28 @@
 """
-URL configuration for backend project.
+Campus Connect - Main URL Configuration (config/urls.py)
+This is the main URLs file that routes requests to your api app.
 
-The `urlpatterns` list routes URLs to views. For more information please see:
-    https://docs.djangoproject.com/en/6.0/topics/http/urls/
-Examples:
-Function views
-    1. Add an import:  from my_app import views
-    2. Add a URL to urlpatterns:  path('', views.home, name='home')
-Class-based views
-    1. Add an import:  from other_app.views import Home
-    2. Add a URL to urlpatterns:  path('', Home.as_view(), name='home')
-Including another URLconf
-    1. Import the include() function: from django.urls import include, path
-    2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
+All API endpoints are prefixed with /api/
+Example: http://localhost:8000/api/auth/login/
 """
+
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
 
 urlpatterns = [
+    # Django admin panel (for debugging/management)
+    # Access at: http://localhost:8000/admin/
     path('admin/', admin.site.urls),
+    
+    # All API endpoints are under /api/
+    # This includes your api/urls.py
+    path('api/', include('api.urls')),
 ]
+
+# Serve media files in development
+# Flutter can access uploaded files at: http://localhost:8000/media/...
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
