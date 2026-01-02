@@ -20,13 +20,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Future<void> login() async {
     setState(() => loading = true);
 
-    // 🔴 MOCK LOGIN (replace with API later)
+    // 🔴 MOCK LOGIN
     await Future.delayed(const Duration(seconds: 1));
 
     await ref.read(authServiceProvider).saveAuth(
       token: 'fake-jwt-token',
-      role: 'student', // change to admin / teacher to test
+      role: 'teacher', // ← comes from backend or JWT
     );
+
 
     setState(() => loading = false);
 
