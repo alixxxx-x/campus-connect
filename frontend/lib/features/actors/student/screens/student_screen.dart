@@ -1,31 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../screens/DashboardTab.dart';
-import '../screens/CoursesTab.dart';
-import '../screens/SettingsTab.dart';
-import '../screens/UserManagementTab.dart';
-class Admin{
-  final String id;
-  final String name;
-  final String email;
-  Admin({
-    required this.id,
-    required this.name,
-    required this.email,
-  });
-}
+import 'student_profile_tab.dart';
+import 'student_schedule_tab.dart';
+import 'student_marks_tab.dart';
 
-class AdminHomeScreen extends ConsumerWidget {
-  const AdminHomeScreen({super.key});
+class StudentScreen extends ConsumerWidget {
+  const StudentScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return DefaultTabController(
-      length: 4,
+      length: 3,
       child: Scaffold(
         appBar: AppBar(
           title: const Text(
-            'Campus Connect Admin',
+            'Campus Connect - Student',
             style: TextStyle(
               fontSize: 20,
               fontWeight: FontWeight.bold,
@@ -35,16 +24,27 @@ class AdminHomeScreen extends ConsumerWidget {
           backgroundColor: Colors.cyan[800],
           foregroundColor: Colors.white,
           elevation: 4,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.notifications),
+              onPressed: () {},
+              tooltip: 'Notifications',
+            ),
+            IconButton(
+              icon: const Icon(Icons.logout),
+              onPressed: () {},
+              tooltip: 'Logout',
+            ),
+          ],
           bottom: TabBar(
             labelColor: Colors.cyanAccent[400],
             unselectedLabelColor: Colors.grey[300],
             indicatorColor: Colors.cyanAccent[400],
             indicatorWeight: 3,
             tabs: const [
-              Tab(icon: Icon(Icons.folder), text: 'Courses'),
-              Tab(icon: Icon(Icons.dashboard), text: 'Dashboard'),
-              Tab(icon: Icon(Icons.manage_accounts), text: 'Users'),
-              Tab(icon: Icon(Icons.settings), text: 'Settings'),
+              Tab(icon: Icon(Icons.person), text: 'Profile'),
+              Tab(icon: Icon(Icons.schedule), text: 'Schedule'),
+              Tab(icon: Icon(Icons.grade), text: 'Grades'),
             ],
           ),
         ),
@@ -61,15 +61,13 @@ class AdminHomeScreen extends ConsumerWidget {
           ),
           child: const TabBarView(
             children: [
-              CoursesTab(),
-              DashboardTab(),
-              UserManagementTab(),
-              SettingsTab(),
+              StudentProfileTab(),
+              StudentScheduleTab(),
+              StudentMarksTab(),
             ],
           ),
         ),
       ),
     );
   }
-
 }

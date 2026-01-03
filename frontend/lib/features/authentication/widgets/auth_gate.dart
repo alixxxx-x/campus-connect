@@ -6,7 +6,7 @@ import '../screens/login_screen.dart';
 
 import '../../actors/admin/screens/admin_home_screen.dart';
 import '../../actors/teacher/screens/teacher_home_screen.dart';
-import '../../actors/student/screens/student_home_screen.dart';
+import '../../actors/student/screens/student_screen.dart';
 
 class AuthGate extends ConsumerWidget {
   const AuthGate({super.key});
@@ -32,9 +32,9 @@ class AuthGate extends ConsumerWidget {
           case 'admin':
             return AdminHomeScreen();
           case 'teacher':
-            return TeacherHomeScreen();
+            return TeacherScreen();
           case 'student':
-            return StudentHomeScreen();
+            return StudentScreen();
           default:
             return LoginScreen();
         }
