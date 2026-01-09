@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'student_providers.dart';
 
 class StudentMarksTab extends ConsumerStatefulWidget {
-  const StudentMarksTab({Key? key}) : super(key: key);
+  const StudentMarksTab({super.key});
 
   @override
   ConsumerState<StudentMarksTab> createState() => _StudentMarksTabState();
@@ -329,7 +329,7 @@ class _StudentMarksTabState extends ConsumerState<StudentMarksTab> {
                             const SizedBox(height: 12),
                           ],
                         );
-                      }).toList(),
+                      }),
 
                       // Total Score
                       Container(
@@ -422,7 +422,7 @@ class _StudentMarksTabState extends ConsumerState<StudentMarksTab> {
                             ),
                           ],
                         ),
-                      )).toList(),
+                      )),
                     ],
                   ),
                 ),

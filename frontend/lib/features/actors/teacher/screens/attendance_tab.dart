@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
-import 'TeacherProvider.dart';
+import 'teacher_provider.dart';
 
 class AttendanceTab extends ConsumerStatefulWidget {
-  const AttendanceTab({Key? key}) : super(key: key);
+  const AttendanceTab({super.key});
 
   @override
   ConsumerState<AttendanceTab> createState() => _AttendanceTabState();
@@ -13,7 +13,13 @@ class AttendanceTab extends ConsumerStatefulWidget {
 class _AttendanceTabState extends ConsumerState<AttendanceTab> {
   String? _selectedCourseId = '1';
   DateTime _selectedWeek = DateTime.now();
-  final List<String> _statusOptions = ['Present', 'Absent', 'Late', 'Excused', 'Not Marked'];
+  final List<String> _statusOptions = [
+    'Present',
+    'Absent',
+    'Late',
+    'Excused',
+    'Not Marked',
+  ];
 
   @override
   void initState() {
@@ -50,12 +56,12 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
                     IconButton(
-                      icon:
-                      Icon(Icons.arrow_back_ios, color: Colors.cyan[800]),
+                      icon: Icon(Icons.arrow_back_ios, color: Colors.cyan[800]),
                       onPressed: () {
                         setState(() {
-                          _selectedWeek =
-                              _selectedWeek.subtract(const Duration(days: 7));
+                          _selectedWeek = _selectedWeek.subtract(
+                            const Duration(days: 7),
+                          );
                           _refreshAttendance();
                         });
                       },
@@ -64,10 +70,7 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                       children: [
                         const Text(
                           'Week of',
-                          style: TextStyle(
-                            fontSize: 14,
-                            color: Colors.grey,
-                          ),
+                          style: TextStyle(fontSize: 14, color: Colors.grey),
                         ),
                         Text(
                           DateFormat('MMM dd, yyyy').format(_selectedWeek),
@@ -80,12 +83,15 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                       ],
                     ),
                     IconButton(
-                      icon: Icon(Icons.arrow_forward_ios,
-                          color: Colors.cyan[800]),
+                      icon: Icon(
+                        Icons.arrow_forward_ios,
+                        color: Colors.cyan[800],
+                      ),
                       onPressed: () {
                         setState(() {
-                          _selectedWeek =
-                              _selectedWeek.add(const Duration(days: 7));
+                          _selectedWeek = _selectedWeek.add(
+                            const Duration(days: 7),
+                          );
                           _refreshAttendance();
                         });
                       },
@@ -128,7 +134,7 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                     );
                   },
                   loading: () =>
-                  const Center(child: CircularProgressIndicator()),
+                      const Center(child: CircularProgressIndicator()),
                   error: (error, stackTrace) => Text('Error: $error'),
                 ),
               ),
@@ -137,8 +143,7 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
             // Attendance Table
             attendanceAsync.when(
               data: (attendanceData) {
-                final courseRecords =
-                    attendanceData[_selectedCourseId] ?? [];
+                final courseRecords = attendanceData[_selectedCourseId] ?? [];
 
                 return Card(
                   elevation: 3,
@@ -163,15 +168,17 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                             coursesAsync.when(
                               data: (courses) {
                                 final course = courses.firstWhere(
-                                      (c) => c.id == _selectedCourseId,
+                                  (c) => c.id == _selectedCourseId,
                                   orElse: () => courses.first,
                                 );
                                 return Chip(
-                                  label:
-                                  Text('${course.code} - ${course.groupId}'),
+                                  label: Text(
+                                    '${course.code} - ${course.groupId}',
+                                  ),
                                   backgroundColor: Colors.cyan[50],
-                                  labelStyle:
-                                  TextStyle(color: Colors.cyan[800]),
+                                  labelStyle: TextStyle(
+                                    color: Colors.cyan[800],
+                                  ),
                                 );
                               },
                               loading: () => const CircularProgressIndicator(),
@@ -227,8 +234,7 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                             return Container(
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom:
-                                  BorderSide(color: Colors.grey[200]!),
+                                  bottom: BorderSide(color: Colors.grey[200]!),
                                 ),
                               ),
                               child: Row(
@@ -248,15 +254,18 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                                           decoration: const InputDecoration(
                                             border: InputBorder.none,
                                             contentPadding:
-                                            EdgeInsets.symmetric(
-                                                horizontal: 4),
+                                                EdgeInsets.symmetric(
+                                                  horizontal: 4,
+                                                ),
                                           ),
                                           value: _getAttendanceStatus(
-                                              record, day),
-                                          items: _statusOptions
-                                              .map((status) {
-                                            Color statusColor =
-                                            _getStatusColor(status);
+                                            record,
+                                            day,
+                                          ),
+                                          items: _statusOptions.map((status) {
+                                            Color statusColor = _getStatusColor(
+                                              status,
+                                            );
                                             return DropdownMenuItem(
                                               value: status,
                                               child: Row(
@@ -276,17 +285,19 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                                             );
                                           }).toList(),
                                           onChanged: (value) {
-                                            final date = _selectedWeek
-                                                .add(Duration(days: day));
+                                            final date = _selectedWeek.add(
+                                              Duration(days: day),
+                                            );
                                             ref
                                                 .read(
-                                                attendanceProvider.notifier)
+                                                  attendanceProvider.notifier,
+                                                )
                                                 .markAttendance(
-                                              _selectedCourseId!,
-                                              record.studentId,
-                                              date,
-                                              value!.toLowerCase(),
-                                            );
+                                                  _selectedCourseId!,
+                                                  record.studentId,
+                                                  date,
+                                                  value!.toLowerCase(),
+                                                );
                                           },
                                         ),
                                       ),
@@ -317,19 +328,29 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                               Row(
                                 children: [
                                   _AttendanceLegend(
-                                      color: Colors.green, label: 'Present'),
+                                    color: Colors.green,
+                                    label: 'Present',
+                                  ),
                                   const SizedBox(width: 16),
                                   _AttendanceLegend(
-                                      color: Colors.red, label: 'Absent'),
+                                    color: Colors.red,
+                                    label: 'Absent',
+                                  ),
                                   const SizedBox(width: 16),
                                   _AttendanceLegend(
-                                      color: Colors.orange, label: 'Late'),
+                                    color: Colors.orange,
+                                    label: 'Late',
+                                  ),
                                   const SizedBox(width: 16),
                                   _AttendanceLegend(
-                                      color: Colors.blue, label: 'Excused'),
+                                    color: Colors.blue,
+                                    label: 'Excused',
+                                  ),
                                   const SizedBox(width: 16),
                                   _AttendanceLegend(
-                                      color: Colors.grey, label: 'Not Marked'),
+                                    color: Colors.grey,
+                                    label: 'Not Marked',
+                                  ),
                                 ],
                               ),
                             ],
@@ -374,9 +395,7 @@ class _AttendanceTabState extends ConsumerState<AttendanceTab> {
                   ),
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stackTrace) => Center(
                 child: Column(
                   children: [
@@ -458,10 +477,7 @@ class _AttendanceLegend extends StatelessWidget {
         Container(
           width: 12,
           height: 12,
-          decoration: BoxDecoration(
-            color: color,
-            shape: BoxShape.circle,
-          ),
+          decoration: BoxDecoration(color: color, shape: BoxShape.circle),
         ),
         const SizedBox(width: 4),
         Text(label, style: const TextStyle(fontSize: 12)),

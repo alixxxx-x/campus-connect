@@ -11,7 +11,6 @@ class LoginScreen extends ConsumerStatefulWidget {
 }
 
 class _LoginScreenState extends ConsumerState<LoginScreen> {
-  
   final emailController = TextEditingController();
   final passwordController = TextEditingController();
 
@@ -23,10 +22,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     // 🔴 MOCK LOGIN (replace with API later)
     await Future.delayed(const Duration(seconds: 1));
 
-    await ref.read(authServiceProvider).saveAuth(
-      token: 'fake-jwt-token',
-      role: 'student', // change to admin / teacher to test
-    );
+    await ref
+        .read(authServiceProvider)
+        .saveAuth(
+          token: 'fake-jwt-token',
+          role: 'student', // change to admin / teacher to test
+        );
+
+    if (!mounted) return;
 
     setState(() => loading = false);
 

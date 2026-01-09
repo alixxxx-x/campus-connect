@@ -5,7 +5,7 @@ import 'attendance_tab.dart';
 import 'marks_tab.dart';
 
 class TeacherScreen extends ConsumerWidget {
-  const TeacherScreen({Key? key}) : super(key: key);
+  const TeacherScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -25,10 +25,7 @@ class TeacherScreen extends ConsumerWidget {
           foregroundColor: Colors.white,
           elevation: 4,
           actions: [
-            IconButton(
-              icon: const Icon(Icons.notifications),
-              onPressed: () {},
-            ),
+            IconButton(icon: const Icon(Icons.notifications), onPressed: () {}),
             IconButton(
               icon: const Icon(Icons.account_circle),
               onPressed: () {},
@@ -51,18 +48,11 @@ class TeacherScreen extends ConsumerWidget {
             gradient: LinearGradient(
               begin: Alignment.topCenter,
               end: Alignment.bottomCenter,
-              colors: [
-                Color(0xFFE0F7FA),
-                Color(0xFFB2EBF2),
-              ],
+              colors: [Color(0xFFE0F7FA), Color(0xFFB2EBF2)],
             ),
           ),
           child: const TabBarView(
-            children: [
-              TeacherCoursesTab(),
-              AttendanceTab(),
-              MarksTab(),
-            ],
+            children: [TeacherCoursesTab(), AttendanceTab(), MarksTab()],
           ),
         ),
       ),

@@ -4,7 +4,7 @@ import 'package:intl/intl.dart';
 import 'student_providers.dart';
 
 class StudentScheduleTab extends ConsumerStatefulWidget {
-  const StudentScheduleTab({Key? key}) : super(key: key);
+  const StudentScheduleTab({super.key});
 
   @override
   ConsumerState<StudentScheduleTab> createState() => _StudentScheduleTabState();
@@ -245,7 +245,7 @@ class _StudentScheduleTabState extends ConsumerState<StudentScheduleTab> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
 
               const SizedBox(height: 20),
 
@@ -324,7 +324,7 @@ class _StudentScheduleTabState extends ConsumerState<StudentScheduleTab> {
                                 color: _getAttendanceColor(record.percentage),
                               ),
                             ),
-                          )).toList(),
+                          )),
                         ],
                       ),
                     ),

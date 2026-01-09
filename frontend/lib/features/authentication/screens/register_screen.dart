@@ -26,7 +26,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     // Input validation
     if (nameController.text.isEmpty ||
         emailController.text.isEmpty ||
-        passwordController.text.isEmpty||bac_yearController.text.isEmpty||specialtyController.text.isEmpty) {
+        passwordController.text.isEmpty ||
+        bac_yearController.text.isEmpty ||
+        specialtyController.text.isEmpty) {
       setState(() {
         errorMessage = 'Please fill in all required fields';
       });
@@ -54,9 +56,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       // Make HTTP POST request
       final response = await http.post(
         Uri.parse(apiUrl),
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: {'Content-Type': 'application/json'},
         body: jsonEncode(requestBody),
       );
 
@@ -70,10 +70,9 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         final String role = responseData['user']['role'] ?? 'student';
 
         // Save authentication data
-        await ref.read(authServiceProvider).saveAuth(
-          token: token,
-          role: role,
-        );
+        await ref.read(authServiceProvider).saveAuth(token: token, role: role);
+
+        if (!mounted) return;
 
         // Navigate to auth gate
         Navigator.pushReplacement(
@@ -84,7 +83,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         // Handle error responses
         final errorData = jsonDecode(response.body);
         setState(() {
-          errorMessage = errorData['message'] ?? 'Registration failed. Please try again.';
+          errorMessage =
+              errorData['message'] ?? 'Registration failed. Please try again.';
         });
       }
     } catch (e) {
@@ -93,7 +93,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         errorMessage = 'Network error: ${e.toString()}';
       });
     } finally {
-      setState(() => loading = false);
+      if (mounted) setState(() => loading = false);
     }
   }
 
@@ -119,10 +119,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   padding: const EdgeInsets.only(bottom: 16),
                   child: Text(
                     errorMessage,
-                    style: const TextStyle(
-                      color: Colors.red,
-                      fontSize: 14,
-                    ),
+                    style: const TextStyle(color: Colors.red, fontSize: 14),
                   ),
                 ),
 
@@ -189,14 +186,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   child: loading
                       ? const SizedBox(
-                    width: 20,
-                    height: 20,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                      : const Text(
-                    'Register',
-                    style: TextStyle(fontSize: 16),
-                  ),
+                          width: 20,
+                          height: 20,
+                          child: CircularProgressIndicator(strokeWidth: 2),
+                        )
+                      : const Text('Register', style: TextStyle(fontSize: 16)),
                 ),
               ),
             ],

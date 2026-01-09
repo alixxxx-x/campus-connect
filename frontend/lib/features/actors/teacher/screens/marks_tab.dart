@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'TeacherProvider.dart';
+import 'teacher_provider.dart';
 
 class MarksTab extends ConsumerStatefulWidget {
-  const MarksTab({Key? key}) : super(key: key);
+  const MarksTab({super.key});
 
   @override
   ConsumerState<MarksTab> createState() => _MarksTabState();
@@ -15,7 +15,7 @@ class _MarksTabState extends ConsumerState<MarksTab> {
     'Midterm',
     'Assignment 1',
     'Quiz 2',
-    'Final'
+    'Final',
   ];
   String? _selectedCourseId = '1';
 
@@ -73,7 +73,8 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                                   return DropdownMenuItem(
                                     value: course.id,
                                     child: Text(
-                                        '${course.name} (${course.code})'),
+                                      '${course.name} (${course.code})',
+                                    ),
                                   );
                                 }).toList(),
                                 onChanged: (value) {
@@ -89,8 +90,7 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                               );
                             },
                             loading: () => const CircularProgressIndicator(),
-                            error: (error, stackTrace) =>
-                                Text('Error: $error'),
+                            error: (error, stackTrace) => Text('Error: $error'),
                           ),
                         ),
                         const SizedBox(width: 16),
@@ -195,8 +195,7 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                             return Container(
                               decoration: BoxDecoration(
                                 border: Border(
-                                  bottom:
-                                  BorderSide(color: Colors.grey[200]!),
+                                  bottom: BorderSide(color: Colors.grey[200]!),
                                 ),
                               ),
                               child: Row(
@@ -222,13 +221,13 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                                           Expanded(
                                             child: Column(
                                               crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                                  CrossAxisAlignment.start,
                                               children: [
                                                 Text(
                                                   mark.studentName,
                                                   style: const TextStyle(
-                                                      fontWeight:
-                                                      FontWeight.w500),
+                                                    fontWeight: FontWeight.w500,
+                                                  ),
                                                 ),
                                                 Text(
                                                   mark.studentId,
@@ -249,24 +248,25 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                                       child: Padding(
                                         padding: const EdgeInsets.all(4),
                                         child: TextFormField(
-                                          initialValue: mark
-                                              .assessments[assessment]
-                                              ?.toStringAsFixed(1) ??
+                                          initialValue:
+                                              mark.assessments[assessment]
+                                                  ?.toStringAsFixed(1) ??
                                               '0',
                                           textAlign: TextAlign.center,
                                           keyboardType: TextInputType.number,
                                           decoration: InputDecoration(
                                             border: OutlineInputBorder(
                                               borderRadius:
-                                              BorderRadius.circular(4),
+                                                  BorderRadius.circular(4),
                                               borderSide: BorderSide(
-                                                  color: Colors.cyan[300]!),
+                                                color: Colors.cyan[300]!,
+                                              ),
                                             ),
                                             contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 8,
-                                              vertical: 4,
-                                            ),
+                                                const EdgeInsets.symmetric(
+                                                  horizontal: 8,
+                                                  vertical: 4,
+                                                ),
                                           ),
                                           onChanged: (value) {
                                             final score =
@@ -275,11 +275,11 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                                               ref
                                                   .read(marksProvider.notifier)
                                                   .updateMark(
-                                                _selectedCourseId!,
-                                                mark.studentId,
-                                                assessment,
-                                                score,
-                                              );
+                                                    _selectedCourseId!,
+                                                    mark.studentId,
+                                                    assessment,
+                                                    score,
+                                                  );
                                             }
                                           },
                                         ),
@@ -292,7 +292,9 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                                         '${mark.totalScore.toStringAsFixed(1)}/100',
                                         style: TextStyle(
                                           fontWeight: FontWeight.bold,
-                                          color: _getGradeColor(mark.totalScore),
+                                          color: _getGradeColor(
+                                            mark.totalScore,
+                                          ),
                                         ),
                                       ),
                                     ),
@@ -346,11 +348,11 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                                       foregroundColor: Colors.white,
                                     ),
                                     onPressed: () {
-                                      ScaffoldMessenger.of(context)
-                                          .showSnackBar(
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
                                         const SnackBar(
-                                          content:
-                                          Text('Totals calculated'),
+                                          content: Text('Totals calculated'),
                                           backgroundColor: Colors.green,
                                         ),
                                       );
@@ -378,9 +380,7 @@ class _MarksTabState extends ConsumerState<MarksTab> {
                   ),
                 );
               },
-              loading: () => const Center(
-                child: CircularProgressIndicator(),
-              ),
+              loading: () => const Center(child: CircularProgressIndicator()),
               error: (error, stackTrace) => Center(
                 child: Column(
                   children: [

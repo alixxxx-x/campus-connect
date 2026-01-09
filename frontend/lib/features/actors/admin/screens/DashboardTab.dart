@@ -10,11 +10,7 @@ class User {
   User({required this.id, required this.name, required this.role});
 
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      name: json['name'],
-      role: json['role'],
-    );
+    return User(id: json['id'], name: json['name'], role: json['role']);
   }
 }
 
@@ -92,7 +88,7 @@ class UsersNotifier extends AsyncNotifier<List<User>> {
 }
 
 class DashboardTab extends ConsumerWidget {
-  const DashboardTab({Key? key}) : super(key: key);
+  const DashboardTab({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -106,9 +102,15 @@ class DashboardTab extends ConsumerWidget {
           usersAsync.when(
             data: (users) {
               // ✅ CORRECTION : Utiliser la méthode where() correctement
-              final totalStudents = users.where((u) => u.role == 'student').length;
-              final totalTeachers = users.where((u) => u.role == 'teacher').length;
-              final pendingRegistrations = users.where((u) => u.role == 'pending').length;
+              final totalStudents = users
+                  .where((u) => u.role == 'student')
+                  .length;
+              final totalTeachers = users
+                  .where((u) => u.role == 'teacher')
+                  .length;
+              final pendingRegistrations = users
+                  .where((u) => u.role == 'pending')
+                  .length;
 
               return GridView.count(
                 shrinkWrap: true,
@@ -117,9 +119,24 @@ class DashboardTab extends ConsumerWidget {
                 crossAxisSpacing: 16,
                 mainAxisSpacing: 16,
                 children: [
-                  _buildStatCard('Total Students', totalStudents, Icons.people, Colors.cyan),
-                  _buildStatCard('Total Teachers', totalTeachers, Icons.school, Colors.cyan[700]!),
-                  _buildStatCard('Pending Registrations', pendingRegistrations, Icons.pending_actions, Colors.orange),
+                  _buildStatCard(
+                    'Total Students',
+                    totalStudents,
+                    Icons.people,
+                    Colors.cyan,
+                  ),
+                  _buildStatCard(
+                    'Total Teachers',
+                    totalTeachers,
+                    Icons.school,
+                    Colors.cyan[700]!,
+                  ),
+                  _buildStatCard(
+                    'Pending Registrations',
+                    pendingRegistrations,
+                    Icons.pending_actions,
+                    Colors.orange,
+                  ),
                   _buildStatCard('Active Courses', 12, Icons.book, Colors.teal),
                 ],
               );
@@ -135,10 +152,7 @@ class DashboardTab extends ConsumerWidget {
                     'Error loading data',
                     style: TextStyle(color: Colors.red[700]),
                   ),
-                  Text(
-                    error.toString(),
-                    textAlign: TextAlign.center,
-                  ),
+                  Text(error.toString(), textAlign: TextAlign.center),
                 ],
               ),
             ),
@@ -170,7 +184,8 @@ class DashboardTab extends ConsumerWidget {
                       ),
                       IconButton(
                         icon: const Icon(Icons.refresh, color: Colors.cyan),
-                        onPressed: () => ref.read(usersProvider.notifier).fetchUsers(),
+                        onPressed: () =>
+                            ref.read(usersProvider.notifier).fetchUsers(),
                       ),
                     ],
                   ),
@@ -178,7 +193,10 @@ class DashboardTab extends ConsumerWidget {
                   usersAsync.when(
                     data: (users) {
                       // Afficher les derniers utilisateurs en attente
-                      final pendingUsers = users.where((u) => u.role == 'pending').take(3).toList();
+                      final pendingUsers = users
+                          .where((u) => u.role == 'pending')
+                          .take(3)
+                          .toList();
 
                       if (pendingUsers.isEmpty) {
                         return const Padding(
@@ -188,36 +206,52 @@ class DashboardTab extends ConsumerWidget {
                       }
 
                       return Column(
-                        children: pendingUsers.map((user) => ListTile(
-                          leading: CircleAvatar(
-                            backgroundColor: Colors.orange[100],
-                            child: Icon(Icons.person, color: Colors.orange[800]),
-                          ),
-                          title: Text(user.name),
-                          subtitle: const Text('Pending registration'),
-                          trailing: Row(
-                            mainAxisSize: MainAxisSize.min,
-                            children: [
-                              IconButton(
-                                icon: const Icon(Icons.check, color: Colors.green),
-                                onPressed: () => _approveUser(context, ref, user.id),
+                        children: pendingUsers
+                            .map(
+                              (user) => ListTile(
+                                leading: CircleAvatar(
+                                  backgroundColor: Colors.orange[100],
+                                  child: Icon(
+                                    Icons.person,
+                                    color: Colors.orange[800],
+                                  ),
+                                ),
+                                title: Text(user.name),
+                                subtitle: const Text('Pending registration'),
+                                trailing: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.check,
+                                        color: Colors.green,
+                                      ),
+                                      onPressed: () =>
+                                          _approveUser(context, ref, user.id),
+                                    ),
+                                    IconButton(
+                                      icon: const Icon(
+                                        Icons.close,
+                                        color: Colors.red,
+                                      ),
+                                      onPressed: () =>
+                                          _deleteUser(context, ref, user.id),
+                                    ),
+                                  ],
+                                ),
                               ),
-                              IconButton(
-                                icon: const Icon(Icons.close, color: Colors.red),
-                                onPressed: () => _deleteUser(context, ref, user.id),
-                              ),
-                            ],
-                          ),
-                        )).toList(),
+                            )
+                            .toList(),
                       );
                     },
-                    loading: () => const Center(child: CircularProgressIndicator()),
+                    loading: () =>
+                        const Center(child: CircularProgressIndicator()),
                     error: (error, stackTrace) => const SizedBox(),
                   ),
 
                   // Activités statiques (optionnel)
                   const Divider(),
-                   ListTile(
+                  ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.cyan[100],
                       child: Icon(Icons.file_upload, color: Colors.cyan[800]),
@@ -225,7 +259,7 @@ class DashboardTab extends ConsumerWidget {
                     title: Text('Timetable uploaded'),
                     subtitle: Text('5 hours ago'),
                   ),
-                   ListTile(
+                  ListTile(
                     leading: CircleAvatar(
                       backgroundColor: Colors.cyan[100],
                       child: Icon(Icons.assignment, color: Colors.cyan[800]),
@@ -245,9 +279,7 @@ class DashboardTab extends ConsumerWidget {
   Widget _buildStatCard(String title, int count, IconData icon, Color color) {
     return Card(
       elevation: 4,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -272,10 +304,7 @@ class DashboardTab extends ConsumerWidget {
             ),
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
+              style: const TextStyle(color: Colors.grey, fontSize: 14),
               textAlign: TextAlign.center,
             ),
           ],
@@ -284,7 +313,11 @@ class DashboardTab extends ConsumerWidget {
     );
   }
 
-  Future<void> _approveUser(BuildContext context, WidgetRef ref, String userId) async {
+  Future<void> _approveUser(
+    BuildContext context,
+    WidgetRef ref,
+    String userId,
+  ) async {
     try {
       await ref.read(usersProvider.notifier).approveRegistration(userId);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -295,15 +328,16 @@ class DashboardTab extends ConsumerWidget {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     }
   }
 
-  Future<void> _deleteUser(BuildContext context, WidgetRef ref, String userId) async {
+  Future<void> _deleteUser(
+    BuildContext context,
+    WidgetRef ref,
+    String userId,
+  ) async {
     try {
       await ref.read(usersProvider.notifier).deleteUser(userId);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -314,10 +348,7 @@ class DashboardTab extends ConsumerWidget {
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $e'),
-          backgroundColor: Colors.red,
-        ),
+        SnackBar(content: Text('Error: $e'), backgroundColor: Colors.red),
       );
     }
   }

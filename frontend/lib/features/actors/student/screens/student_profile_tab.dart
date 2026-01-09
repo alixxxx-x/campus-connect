@@ -5,7 +5,7 @@ import 'dart:io';
 import 'student_providers.dart';
 
 class StudentProfileTab extends ConsumerStatefulWidget {
-  const StudentProfileTab({Key? key}) : super(key: key);
+  const StudentProfileTab({super.key});
 
   @override
   ConsumerState<StudentProfileTab> createState() => _StudentProfileTabState();
@@ -203,7 +203,7 @@ class _StudentProfileTabState extends ConsumerState<StudentProfileTab> {
                           icon: Icon(Icons.delete, color: Colors.red),
                           onPressed: () {},
                         ),
-                      )).toList(),
+                      )),
                     ],
                   ),
                 ),

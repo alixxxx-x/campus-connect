@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:file_picker/file_picker.dart';
 import 'dart:io';
-import 'TeacherProvider.dart';
+import 'teacher_provider.dart';
 
 class TeacherCoursesTab extends ConsumerStatefulWidget {
-  const TeacherCoursesTab({Key? key}) : super(key: key);
+  const TeacherCoursesTab({super.key});
 
   @override
   ConsumerState<TeacherCoursesTab> createState() => _TeacherCoursesTabState();
@@ -68,8 +68,10 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
                               borderRadius: BorderRadius.circular(8),
                               borderSide: BorderSide(color: Colors.cyan[400]!),
                             ),
-                            prefixIcon:
-                            Icon(Icons.school, color: Colors.cyan[800]),
+                            prefixIcon: Icon(
+                              Icons.school,
+                              color: Colors.cyan[800],
+                            ),
                           ),
                           value: _selectedCourseId,
                           items: courses.map((course) {
@@ -90,8 +92,8 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
                           },
                         );
                       },
-                      loading: () => const Center(
-                          child: CircularProgressIndicator()),
+                      loading: () =>
+                          const Center(child: CircularProgressIndicator()),
                       error: (error, stackTrace) => Text('Error: $error'),
                     ),
                   ],
@@ -141,20 +143,24 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
                       Wrap(
                         spacing: 8,
                         children:
-                        ['All', 'Lecture Notes', 'Assignments', 'Resources']
-                            .map((type) {
-                          return FilterChip(
-                            label: Text(type),
-                            selected: true,
-                            onSelected: (_) {},
-                            backgroundColor: Colors.cyan[50],
-                            selectedColor: Colors.cyan[100],
-                            labelStyle: TextStyle(
-                              color: Colors.cyan[800],
-                              fontWeight: FontWeight.w500,
-                            ),
-                          );
-                        }).toList(),
+                            [
+                              'All',
+                              'Lecture Notes',
+                              'Assignments',
+                              'Resources',
+                            ].map((type) {
+                              return FilterChip(
+                                label: Text(type),
+                                selected: true,
+                                onSelected: (_) {},
+                                backgroundColor: Colors.cyan[50],
+                                selectedColor: Colors.cyan[100],
+                                labelStyle: TextStyle(
+                                  color: Colors.cyan[800],
+                                  fontWeight: FontWeight.w500,
+                                ),
+                              );
+                            }).toList(),
                       ),
                       const SizedBox(height: 16),
                       // Files List
@@ -179,23 +185,30 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
                                     color: Colors.cyan[100],
                                     borderRadius: BorderRadius.circular(8),
                                   ),
-                                  child: Icon(Icons.insert_drive_file,
-                                      color: Colors.cyan[800]),
+                                  child: Icon(
+                                    Icons.insert_drive_file,
+                                    color: Colors.cyan[800],
+                                  ),
                                 ),
                                 title: Text(file.name),
                                 subtitle: Text(
-                                    'Uploaded: ${_formatDate(file.uploadedAt)}'),
+                                  'Uploaded: ${_formatDate(file.uploadedAt)}',
+                                ),
                                 trailing: Row(
                                   mainAxisSize: MainAxisSize.min,
                                   children: [
                                     IconButton(
-                                      icon: const Icon(Icons.download,
-                                          color: Colors.cyan),
+                                      icon: const Icon(
+                                        Icons.download,
+                                        color: Colors.cyan,
+                                      ),
                                       onPressed: () {},
                                     ),
                                     IconButton(
-                                      icon:
-                                      const Icon(Icons.delete, color: Colors.red),
+                                      icon: const Icon(
+                                        Icons.delete,
+                                        color: Colors.red,
+                                      ),
                                       onPressed: () {},
                                     ),
                                   ],
@@ -204,8 +217,8 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
                             },
                           );
                         },
-                        loading: () => const Center(
-                            child: CircularProgressIndicator()),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
                         error: (error, stackTrace) => Text('Error: $error'),
                       ),
                     ],
@@ -237,7 +250,7 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
                       coursesAsync.when(
                         data: (courses) {
                           final course = courses.firstWhere(
-                                (c) => c.id == _selectedCourseId,
+                            (c) => c.id == _selectedCourseId,
                             orElse: () => courses.first,
                           );
                           return ListView.builder(
@@ -253,22 +266,24 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
                                     student.name.isNotEmpty
                                         ? student.name[0].toUpperCase()
                                         : '?',
-                                    style:
-                                    const TextStyle(color: Colors.white),
+                                    style: const TextStyle(color: Colors.white),
                                   ),
                                 ),
                                 title: Text(student.name),
                                 subtitle: Text('ID: ${student.studentId}'),
                                 trailing: IconButton(
-                                  icon: const Icon(Icons.email, color: Colors.cyan),
+                                  icon: const Icon(
+                                    Icons.email,
+                                    color: Colors.cyan,
+                                  ),
                                   onPressed: () {},
                                 ),
                               );
                             },
                           );
                         },
-                        loading: () => const Center(
-                            child: CircularProgressIndicator()),
+                        loading: () =>
+                            const Center(child: CircularProgressIndicator()),
                         error: (error, stackTrace) => Text('Error: $error'),
                       ),
                     ],
@@ -299,18 +314,20 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
               title: const Text('Upload from Gallery'),
               onTap: () async {
                 Navigator.pop(context);
-                final pickedFile =
-                await _picker.pickImage(source: ImageSource.gallery);
+                final pickedFile = await _picker.pickImage(
+                  source: ImageSource.gallery,
+                );
                 if (pickedFile != null) {
                   try {
                     await ref
                         .read(teacherFilesProvider.notifier)
                         .uploadFile(
-                      courseId,
-                      File(pickedFile.path),
-                      'Image_${DateTime.now().millisecondsSinceEpoch}',
-                      'resource',
-                    );
+                          courseId,
+                          File(pickedFile.path),
+                          'Image_${DateTime.now().millisecondsSinceEpoch}',
+                          'resource',
+                        );
+                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('File uploaded successfully'),
@@ -343,11 +360,12 @@ class _TeacherCoursesTabState extends ConsumerState<TeacherCoursesTab> {
                     await ref
                         .read(teacherFilesProvider.notifier)
                         .uploadFile(
-                      courseId,
-                      File(file.path!),
-                      file.name,
-                      'document',
-                    );
+                          courseId,
+                          File(file.path!),
+                          file.name,
+                          'document',
+                        );
+                    if (!mounted) return;
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
                         content: Text('File uploaded successfully'),

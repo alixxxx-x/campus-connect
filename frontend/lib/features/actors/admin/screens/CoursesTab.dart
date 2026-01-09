@@ -115,7 +115,7 @@ class FilesNotifier extends AsyncNotifier<List<FileItem>> {
 }
 
 class CoursesTab extends ConsumerStatefulWidget {
-  const CoursesTab({Key? key}) : super(key: key);
+  const CoursesTab({super.key});
 
   @override
   ConsumerState<CoursesTab> createState() => _CoursesTabState();
@@ -210,7 +210,7 @@ class _CoursesTabState extends ConsumerState<CoursesTab> {
                             leading: Icon(_getCategoryIcon(file.category)),
                             title: Text(file.name),
                             subtitle: Text(file.category),
-                          )).toList(),
+                          )),
                         ],
                       );
                     },

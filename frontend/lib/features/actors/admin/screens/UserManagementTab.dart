@@ -139,7 +139,7 @@ class UsersNotifier extends AsyncNotifier<List<User>> {
 }
 
 class UserManagementTab extends ConsumerStatefulWidget {
-  const UserManagementTab({Key? key}) : super(key: key);
+  const UserManagementTab({super.key});
 
   @override
   ConsumerState<UserManagementTab> createState() => _UserManagementTabState();

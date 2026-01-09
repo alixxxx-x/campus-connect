@@ -5,7 +5,7 @@ import 'student_schedule_tab.dart';
 import 'student_marks_tab.dart';
 
 class StudentScreen extends ConsumerWidget {
-  const StudentScreen({Key? key}) : super(key: key);
+  const StudentScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {

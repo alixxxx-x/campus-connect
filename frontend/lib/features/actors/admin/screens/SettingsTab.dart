@@ -1,7 +1,7 @@
-import'package:flutter/material.dart';
+import 'package:flutter/material.dart';
 
 class SettingsTab extends StatefulWidget {
-  const SettingsTab({Key? key}) : super(key: key);
+  const SettingsTab({super.key});
 
   @override
   State<SettingsTab> createState() => _SettingsTabState();
@@ -37,17 +37,23 @@ class _SettingsTabState extends State<SettingsTab> {
                 const SizedBox(height: 16),
                 SwitchListTile(
                   title: const Text('Enable Notifications'),
-                  subtitle: const Text('Receive notifications for new registrations'),
+                  subtitle: const Text(
+                    'Receive notifications for new registrations',
+                  ),
                   activeColor: Colors.cyan,
                   value: _notificationsEnabled,
-                  onChanged: (value) => setState(() => _notificationsEnabled = value),
+                  onChanged: (value) =>
+                      setState(() => _notificationsEnabled = value),
                 ),
                 SwitchListTile(
                   title: const Text('Auto-approve Registrations'),
-                  subtitle: const Text('Automatically approve student registrations'),
+                  subtitle: const Text(
+                    'Automatically approve student registrations',
+                  ),
                   activeColor: Colors.cyan,
                   value: _autoApproveEnabled,
-                  onChanged: (value) => setState(() => _autoApproveEnabled = value),
+                  onChanged: (value) =>
+                      setState(() => _autoApproveEnabled = value),
                 ),
               ],
             ),
@@ -91,7 +97,10 @@ class _SettingsTabState extends State<SettingsTab> {
                 ),
                 ListTile(
                   leading: Icon(Icons.logout, color: Colors.red),
-                  title: const Text('Logout', style: TextStyle(color: Colors.red)),
+                  title: const Text(
+                    'Logout',
+                    style: TextStyle(color: Colors.red),
+                  ),
                   trailing: const Icon(Icons.chevron_right, color: Colors.red),
                   onTap: () => _logout(),
                 ),
@@ -129,9 +138,14 @@ class _SettingsTabState extends State<SettingsTab> {
                   title: const Text('Last Backup'),
                   subtitle: const Text('2024-01-15 14:30'),
                   trailing: ElevatedButton(
-                    style: ElevatedButton.styleFrom(backgroundColor: Colors.cyan),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: Colors.cyan,
+                    ),
                     onPressed: () => _checkUpdates(),
-                    child: const Text('Check Updates', style: TextStyle(color: Colors.white)),
+                    child: const Text(
+                      'Check Updates',
+                      style: TextStyle(color: Colors.white),
+                    ),
                   ),
                 ),
               ],
@@ -157,7 +171,9 @@ class _SettingsTabState extends State<SettingsTab> {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Confirm Reset'),
-        content: const Text('Are you sure you want to reset all settings to default?'),
+        content: const Text(
+          'Are you sure you want to reset all settings to default?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
@@ -191,10 +207,7 @@ class BottomBorder extends Decoration {
   final Color color;
   final double width;
 
-  const BottomBorder({
-    required this.color,
-    this.width = 1.0,
-  });
+  const BottomBorder({required this.color, this.width = 1.0});
 
   @override
   BoxPainter createBoxPainter([VoidCallback? onChanged]) {
