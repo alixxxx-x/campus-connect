@@ -143,7 +143,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     return SwitchListTile(
       value: val,
       onChanged: (v) {},
-      activeColor: primaryBlue,
+      activeThumbColor: primaryBlue,
       title: Text(
         title,
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
