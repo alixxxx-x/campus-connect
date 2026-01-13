@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../providers/admin_providers.dart';
 import '../../../../shared/services/auth_service.dart';
+import '../../../../shared/providers/auth_provider.dart';
 import 'admin_style.dart';
 
 class SettingsTab extends ConsumerStatefulWidget {
@@ -12,14 +13,13 @@ class SettingsTab extends ConsumerStatefulWidget {
 }
 
 class _SettingsTabState extends ConsumerState<SettingsTab> {
-  static const primaryBlue = Color(
-    0xFF4A80F0,
-  ); // Consider replacing with AdminStyle.primary
+  static const primaryBlue = Color(0xFF4A80F0);
 
   @override
   Widget build(BuildContext context) {
     final settings = ref.watch(adminSettingsProvider);
     final settingsNotifier = ref.read(adminSettingsProvider.notifier);
+    final user = ref.watch(authProvider);
 
     return Scaffold(
       backgroundColor: Colors.transparent,
@@ -42,11 +42,11 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
                 ),
               ),
               title: Text(
-                'Admin Authority',
+                user?.name ?? 'Admin Authority',
                 style: AdminStyle.subHeader.copyWith(fontSize: 15),
               ),
               subtitle: Text(
-                'admin@campus.edu',
+                user?.email ?? 'admin@campus.edu',
                 style: AdminStyle.body.copyWith(fontSize: 12),
               ),
               trailing: const Icon(
@@ -64,47 +64,269 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
               children: [
                 _buildToggle(
                   'Push Notifications',
-                  'Real-time alerts',
+                  'Real-time alerts for system events',
                   settings.pushNotifications,
-                  (v) => settingsNotifier.togglePushNotifications(),
+                  (v) {
+                    settingsNotifier.togglePushNotifications();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          v
+                              ? 'Push notifications enabled'
+                              : 'Push notifications disabled',
+                        ),
+                        backgroundColor: AdminStyle.primary,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    );
+                  },
                 ),
                 const Divider(height: 1, indent: 60),
                 _buildToggle(
                   'Cloud Sync',
-                  'Automatic data backup',
+                  'Automatic data backup to cloud',
                   settings.cloudSync,
-                  (v) => settingsNotifier.toggleCloudSync(),
+                  (v) {
+                    settingsNotifier.toggleCloudSync();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          v ? 'Cloud sync enabled' : 'Cloud sync disabled',
+                        ),
+                        backgroundColor: AdminStyle.primary,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    );
+                  },
+                ),
+                const Divider(height: 1, indent: 60),
+                _buildToggle(
+                  'New Student Alerts',
+                  'Notify when students register',
+                  settings.newStudentAlerts,
+                  (v) {
+                    settingsNotifier.toggleNewStudentAlerts();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          v
+                              ? 'Student alerts enabled'
+                              : 'Student alerts disabled',
+                        ),
+                        backgroundColor: AdminStyle.primary,
+                        behavior: SnackBarBehavior.floating,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                    );
+                  },
                 ),
               ],
             ),
           ),
-          const SizedBox(height: 16),
-          SwitchListTile(
-            contentPadding: EdgeInsets.zero,
-            title: Text(
-              'New Student Notifications',
-              style: AdminStyle.subHeader.copyWith(fontSize: 15),
+          const SizedBox(height: 32),
+
+          _buildHeading('Quick Actions'),
+          _buildCard(
+            child: Column(
+              children: [
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.blue.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.info_outline_rounded,
+                      color: Colors.blue,
+                      size: 22,
+                    ),
+                  ),
+                  title: const Text(
+                    'System Information',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  subtitle: const Text(
+                    'View app version and details',
+                    style: TextStyle(fontSize: 11),
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                  onTap: () => _showSystemInfo(),
+                ),
+                const Divider(height: 1, indent: 60),
+                ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: Colors.purple.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: const Icon(
+                      Icons.help_outline_rounded,
+                      color: Colors.purple,
+                      size: 22,
+                    ),
+                  ),
+                  title: const Text(
+                    'Help & Support',
+                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                  ),
+                  subtitle: const Text(
+                    'Get assistance and documentation',
+                    style: TextStyle(fontSize: 11),
+                  ),
+                  trailing: const Icon(Icons.chevron_right_rounded, size: 20),
+                  onTap: () => _showHelp(),
+                ),
+              ],
             ),
-            subtitle: Text(
-              'Alert when students register',
-              style: AdminStyle.body.copyWith(fontSize: 12),
-            ),
-            activeColor: AdminStyle.primary,
-            value: settings.newStudentAlerts,
-            onChanged: (val) => settingsNotifier.toggleNewStudentAlerts(),
           ),
-          const Divider(),
-          const Divider(),
           const SizedBox(height: 48),
 
           _buildActionCard(
             'Secure Sign Out',
-            'Disconnect current session',
+            'Disconnect current admin session',
             Icons.power_settings_new_rounded,
             Colors.red[400]!,
-            () => ref.read(authServiceProvider).logout(),
+            () => _confirmLogout(),
           ),
           const SizedBox(height: 120),
+        ],
+      ),
+    );
+  }
+
+  void _confirmLogout() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Text(
+          'Sign Out',
+          style: TextStyle(fontWeight: FontWeight.bold),
+        ),
+        content: const Text('Are you sure you want to sign out?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.red,
+              foregroundColor: Colors.white,
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+            ),
+            onPressed: () {
+              Navigator.pop(context);
+              ref.read(authServiceProvider).logout();
+            },
+            child: const Text('Sign Out'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showSystemInfo() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.info_outline_rounded, color: AdminStyle.primary),
+            SizedBox(width: 12),
+            Text(
+              'System Information',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildInfoRow('App Name', 'Campus Connect'),
+            _buildInfoRow('Version', '1.0.0'),
+            _buildInfoRow('Platform', 'Flutter'),
+            _buildInfoRow('Role', 'Administrator'),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showHelp() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        title: const Row(
+          children: [
+            Icon(Icons.help_outline_rounded, color: Colors.purple),
+            SizedBox(width: 12),
+            Text(
+              'Help & Support',
+              style: TextStyle(fontWeight: FontWeight.bold),
+            ),
+          ],
+        ),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Need help?',
+              style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
+            SizedBox(height: 12),
+            Text(
+              '• Manage courses and groups from the Courses tab\n'
+              '• Approve students from the Users tab\n'
+              '• Create schedules from the Schedule tab\n'
+              '• Message users from the Messages tab',
+              style: TextStyle(fontSize: 14, height: 1.5),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Got it'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(String label, String value) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 14)),
+          Text(
+            value,
+            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+          ),
         ],
       ),
     );
@@ -151,7 +373,7 @@ class _SettingsTabState extends ConsumerState<SettingsTab> {
     return SwitchListTile(
       value: val,
       onChanged: onChanged,
-      activeThumbColor: primaryBlue,
+      activeColor: primaryBlue,
       title: Text(
         title,
         style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),

@@ -17,9 +17,13 @@ class Course {
 class AppUser {
   final String id;
   final String name;
+  final String firstName;
+  final String lastName;
   final String email;
   final String role; // 'student', 'teacher', 'admin', 'pending'
+  final String? studentId;
   final String? groupId;
+  final String? groupName;
   final String? avatarUrl;
   final String? program;
   final int? semester;
@@ -29,9 +33,13 @@ class AppUser {
   AppUser({
     required this.id,
     required this.name,
+    required this.firstName,
+    required this.lastName,
     required this.email,
     required this.role,
+    this.studentId,
     this.groupId,
+    this.groupName,
     this.avatarUrl,
     this.program,
     this.semester,
@@ -52,9 +60,13 @@ class AppUser {
     return AppUser(
       id: json['id']?.toString() ?? '',
       name: combinedName,
+      firstName: firstName,
+      lastName: lastName,
       email: json['email'] ?? '',
       role: json['role'] ?? 'STUDENT',
+      studentId: json['student_id'],
       groupId: json['group_id']?.toString() ?? json['group']?.toString(),
+      groupName: json['group_name'],
       avatarUrl: json['profile_picture'], // Django uses profile_picture
       program: json['program'],
       semester: json['semester'] is int ? json['semester'] : null,
@@ -67,9 +79,13 @@ class AppUser {
     return {
       'id': id,
       'name': name,
+      'first_name': firstName,
+      'last_name': lastName,
       'email': email,
       'role': role,
+      'student_id': studentId,
       'group_id': groupId,
+      'group_name': groupName,
       'avatar_url': avatarUrl,
       'program': program,
       'semester': semester,

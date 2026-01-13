@@ -132,7 +132,7 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
                     children: [
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedDay,
+                          initialValue: _selectedDay,
                           decoration: AdminStyle.inputDec(
                             'Day',
                             icon: Icons.calendar_today_rounded,
@@ -166,7 +166,7 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
                       const SizedBox(width: 16),
                       Expanded(
                         child: DropdownButtonFormField<String>(
-                          value: _selectedType,
+                          initialValue: _selectedType,
                           decoration: AdminStyle.inputDec(
                             'Type',
                             icon: Icons.category_rounded,
@@ -212,7 +212,7 @@ class _ScheduleTabState extends ConsumerState<ScheduleTab> {
                                 .toList();
 
                       return DropdownButtonFormField<CourseAssignment>(
-                        value: _selectedAssignment,
+                        initialValue: _selectedAssignment,
                         decoration: AdminStyle.inputDec(
                           'Course',
                           icon: Icons.book_rounded,

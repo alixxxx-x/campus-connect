@@ -53,7 +53,7 @@ class _CoursesTabState extends ConsumerState<CoursesTab> {
                   Expanded(
                     child: _buildGradientCategory(
                       'Groups',
-                      'Cohorts',
+                      'Classes',
                       Icons.diversity_3_rounded,
                       [const Color(0xFF1E293B), const Color(0xFF475569)],
                       _showGroupManagementDialog,
@@ -430,7 +430,7 @@ class _CoursesTabState extends ConsumerState<CoursesTab> {
               const SizedBox(height: 12),
               groupsAsync.when(
                 data: (groups) => _buildDropdown(
-                  'Cohort Group',
+                  'Student Group',
                   groups
                       .map(
                         (g) =>
@@ -534,67 +534,215 @@ class _CoursesTabState extends ConsumerState<CoursesTab> {
   }
 
   void _showGroupManagementDialog() {
-    final groupsAsync = ref.watch(adminGroupsProvider);
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-        title: const Text(
-          'Active Cohorts',
-          style: TextStyle(fontWeight: FontWeight.w800),
-        ),
-        content: SizedBox(
-          width: double.maxFinite,
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              groupsAsync.when(
-                data: (groups) => Flexible(
-                  child: ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: groups.length,
-                    itemBuilder: (context, index) => ListTile(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(15),
+      builder: (context) => Consumer(
+        builder: (context, ref, child) {
+          final groupsAsync = ref.watch(adminGroupsProvider);
+
+          return Dialog(
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(28),
+            ),
+            backgroundColor: Colors.white,
+            child: Container(
+              constraints: const BoxConstraints(maxWidth: 400, maxHeight: 600),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Header
+                  Row(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: primaryBlue.withOpacity(0.1),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(
+                          Icons.diversity_3_rounded,
+                          color: primaryBlue,
+                          size: 24,
+                        ),
                       ),
-                      title: Text(
-                        groups[index].name,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      const SizedBox(width: 16),
+                      const Expanded(
+                        child: Text(
+                          'Active Groups',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.w800,
+                            color: Color(0xFF0F172A),
+                          ),
+                        ),
                       ),
-                      subtitle: Text(groups[index].academicYear),
-                      trailing: const Icon(
-                        Icons.chevron_right_rounded,
-                        size: 20,
+                      IconButton(
+                        icon: const Icon(Icons.close_rounded),
+                        onPressed: () => Navigator.pop(context),
+                        style: IconButton.styleFrom(
+                          foregroundColor: Colors.grey[600],
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Groups List
+                  Flexible(
+                    child: groupsAsync.when(
+                      data: (groups) {
+                        if (groups.isEmpty) {
+                          return Center(
+                            child: Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(
+                                  Icons.group_off_rounded,
+                                  size: 64,
+                                  color: Colors.grey[300],
+                                ),
+                                const SizedBox(height: 16),
+                                Text(
+                                  'No groups yet',
+                                  style: TextStyle(
+                                    fontSize: 16,
+                                    color: Colors.grey[600],
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }
+
+                        return ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: groups.length,
+                          itemBuilder: (context, index) {
+                            final group = groups[index];
+                            return Container(
+                              margin: const EdgeInsets.only(bottom: 12),
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFF8FAFC),
+                                borderRadius: BorderRadius.circular(16),
+                                border: Border.all(
+                                  color: Colors.grey[200]!,
+                                  width: 1,
+                                ),
+                              ),
+                              child: ListTile(
+                                contentPadding: const EdgeInsets.symmetric(
+                                  horizontal: 16,
+                                  vertical: 8,
+                                ),
+                                leading: Container(
+                                  padding: const EdgeInsets.all(10),
+                                  decoration: BoxDecoration(
+                                    color: primaryBlue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: const Icon(
+                                    Icons.people_rounded,
+                                    color: primaryBlue,
+                                    size: 20,
+                                  ),
+                                ),
+                                title: Text(
+                                  group.name,
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.w700,
+                                    fontSize: 15,
+                                    color: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                subtitle: Text(
+                                  group.academicYear,
+                                  style: TextStyle(
+                                    color: Colors.grey[600],
+                                    fontSize: 13,
+                                  ),
+                                ),
+                                trailing: Icon(
+                                  Icons.chevron_right_rounded,
+                                  color: Colors.grey[400],
+                                  size: 20,
+                                ),
+                              ),
+                            );
+                          },
+                        );
+                      },
+                      loading: () => const Center(
+                        child: Padding(
+                          padding: EdgeInsets.all(40),
+                          child: CircularProgressIndicator(color: primaryBlue),
+                        ),
+                      ),
+                      error: (e, st) => Center(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.error_outline_rounded,
+                              size: 48,
+                              color: Colors.red[300],
+                            ),
+                            const SizedBox(height: 16),
+                            Text(
+                              'Failed to load groups',
+                              style: TextStyle(
+                                color: Colors.grey[600],
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
-                ),
-                loading: () => const CircularProgressIndicator(),
-                error: (e, st) => Text('Error: $e'),
+
+                  const SizedBox(height: 24),
+
+                  // Create Button
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: ElevatedButton(
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: primaryBlue,
+                        foregroundColor: Colors.white,
+                        elevation: 0,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                      ),
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showCreateGroupDialog();
+                      },
+                      child: const Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(Icons.add_circle_rounded, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Create New Group',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w700,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF1E293B),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                  ),
-                  onPressed: _showCreateGroupDialog,
-                  child: const Text(
-                    'Register New Cohort',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
     );
   }
@@ -608,7 +756,7 @@ class _CoursesTabState extends ConsumerState<CoursesTab> {
       builder: (context) => AlertDialog(
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
         title: const Text(
-          'New Cohort',
+          'New Group',
           style: TextStyle(fontWeight: FontWeight.w800),
         ),
         content: Column(
@@ -625,7 +773,7 @@ class _CoursesTabState extends ConsumerState<CoursesTab> {
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF1E293B),
+              backgroundColor: primaryBlue,
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(15),
               ),

@@ -1,66 +1,107 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'teacher_courses_tab.dart';
-import 'attendance_tab.dart';
-import 'marks_tab.dart';
-import '../../../../shared/services/auth_service.dart';
+import 'teacher_overview_tab.dart';
 
-class TeacherScreen extends ConsumerWidget {
+import 'teacher_messages_tab.dart';
+
+import 'teacher_profile_tab.dart';
+
+import 'teacher_schedule_tab.dart';
+
+import 'teacher_attendance_tab.dart';
+import 'teacher_grading_tab.dart';
+
+class TeacherScreen extends ConsumerStatefulWidget {
   const TeacherScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    return DefaultTabController(
-      length: 3,
-      child: Scaffold(
-        appBar: AppBar(
-          title: const Text(
-            'Campus Connect - Teacher',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-            ),
-          ),
-          backgroundColor: Colors.cyan[800],
-          foregroundColor: Colors.white,
-          elevation: 4,
-          actions: [
-            IconButton(icon: const Icon(Icons.notifications), onPressed: () {}),
-            IconButton(
-              icon: const Icon(Icons.account_circle),
-              onPressed: () {},
-            ),
-            IconButton(
-              icon: const Icon(Icons.logout),
-              onPressed: () {
-                ref.read(authServiceProvider).logout();
-              },
-              tooltip: 'Logout',
+  ConsumerState<TeacherScreen> createState() => _TeacherScreenState();
+}
+
+class _TeacherScreenState extends ConsumerState<TeacherScreen> {
+  int _currentIndex = 0;
+
+  final List<Widget> _tabs = [
+    const TeacherOverviewTab(),
+    const TeacherAttendanceTab(),
+    const TeacherGradingTab(),
+    const TeacherScheduleTab(),
+    const TeacherMessagesTab(),
+    const TeacherProfileTab(),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: IndexedStack(index: _currentIndex, children: _tabs),
+      bottomNavigationBar: Container(
+        decoration: BoxDecoration(
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+              offset: const Offset(0, -5),
             ),
           ],
-          bottom: TabBar(
-            labelColor: Colors.cyanAccent[400],
-            unselectedLabelColor: Colors.grey[300],
-            indicatorColor: Colors.cyanAccent[400],
-            indicatorWeight: 3,
-            tabs: const [
-              Tab(icon: Icon(Icons.folder), text: 'Courses'),
-              Tab(icon: Icon(Icons.person), text: 'Attendance'),
-              Tab(icon: Icon(Icons.grade), text: 'Marks'),
-            ],
-          ),
         ),
-        body: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Color(0xFFE0F7FA), Color(0xFFB2EBF2)],
+        child: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
             ),
-          ),
-          child: const TabBarView(
-            children: [TeacherCoursesTab(), AttendanceTab(), MarksTab()],
+            child: BottomNavigationBar(
+              currentIndex: _currentIndex,
+              onTap: (index) => setState(() => _currentIndex = index),
+              type: BottomNavigationBarType.fixed,
+              backgroundColor: Colors.white,
+              elevation: 0,
+              selectedItemColor: const Color(0xFF6366F1),
+              unselectedItemColor: Colors.grey[400],
+              showSelectedLabels: true,
+              showUnselectedLabels: true,
+              selectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w600,
+                fontSize: 12,
+              ),
+              unselectedLabelStyle: const TextStyle(
+                fontWeight: FontWeight.w500,
+                fontSize: 12,
+              ),
+              items: const [
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.dashboard_outlined),
+                  activeIcon: Icon(Icons.dashboard_rounded),
+                  label: 'Overview',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.check_circle_outline_rounded),
+                  activeIcon: Icon(Icons.check_circle_rounded),
+                  label: 'Attendance',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.grade_outlined),
+                  activeIcon: Icon(Icons.grade_rounded),
+                  label: 'Grades',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.calendar_today_outlined),
+                  activeIcon: Icon(Icons.calendar_today_rounded),
+                  label: 'Schedule',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.chat_bubble_outline_rounded),
+                  activeIcon: Icon(Icons.chat_bubble_rounded),
+                  label: 'Chats',
+                ),
+                BottomNavigationBarItem(
+                  icon: Icon(Icons.person_outline),
+                  activeIcon: Icon(Icons.person_rounded),
+                  label: 'Profile',
+                ),
+              ],
+            ),
           ),
         ),
       ),

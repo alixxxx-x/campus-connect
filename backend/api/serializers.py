@@ -1,38 +1,13 @@
-"""
-Campus Connect - Serializers
-Serializers convert Django model instances to JSON (for Flutter) and vice versa.
-Think of them as translators between Python objects and JSON data.
 
-When Flutter sends JSON → Serializer validates and creates Python objects
-When Django sends data → Serializer converts Python objects to JSON for Flutter
-"""
 
 from rest_framework import serializers
 from django.contrib.auth import authenticate
 from .models import User, Course, Group, Grade, Attendance, CourseFile, Timetable, CourseAssignment, Message, Notification, ScheduleSession
 
 
-# ============================================================================
-# USER SERIALIZERS - For authentication and user management
-# ============================================================================
+
 
 class UserSerializer(serializers.ModelSerializer):
-    """
-    Main user serializer - converts User model to/from JSON.
-    
-    Flutter receives this format after login or when fetching user profile.
-    Example JSON Flutter gets:
-    {
-        "id": 1,
-        "username": "student123",
-        "email": "student@example.com",
-        "role": "STUDENT",
-        "first_name": "John",
-        "last_name": "Doe",
-        "student_id": "192031234",
-        ...
-    }
-    """
     
     # Include group details when serializing
     group_name = serializers.SerializerMethodField()
@@ -55,21 +30,19 @@ class UserSerializer(serializers.ModelSerializer):
         return obj.group.id if obj.group else None
 
 
+class UserSearchSerializer(serializers.ModelSerializer):
+    full_name = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'full_name', 'role', 'profile_picture']
+
+    def get_full_name(self, obj):
+        name = obj.get_full_name().strip()
+        return name if name else obj.username
+
+
 class RegisterSerializer(serializers.ModelSerializer):
-    """
-    Used when student registers via Flutter's RegisterScreen.
-    
-    Flutter sends:
-    {
-        "username": "newstudent",
-        "password": "securepass123",
-        "email": "new@example.com",
-        "first_name": "Jane",
-        "last_name": "Smith",
-        "student_id": "192031235",
-        ...
-    }
-    """
     
     password = serializers.CharField(write_only=True, min_length=8)
     password2 = serializers.CharField(write_only=True, label="Confirm Password")
@@ -89,15 +62,7 @@ class RegisterSerializer(serializers.ModelSerializer):
         return data
     
     def create(self, validated_data):
-        """
-        Create new user with hashed password.
-        is_approved defaults to False - admin must approve before login works.
-        IMPORTANT: Public registration is ONLY for Students.
-        """
-        validated_data.pop('password2')  # Remove password2, not needed in model
-        
-        # Security: Always force STUDENT role for public registration
-        # Even if a malicious request sends role='ADMIN' or 'TEACHER'
+        validated_data.pop('password2')
         validated_data.pop('role', None) 
         
         user = User.objects.create_user(
@@ -117,24 +82,11 @@ class RegisterSerializer(serializers.ModelSerializer):
 
 
 class LoginSerializer(serializers.Serializer):
-    """
-    Handles login validation when Flutter sends credentials.
-    
-    Flutter LoginScreen sends:
-    {
-        "username": "student123",
-        "password": "password123"
-    }
-    """
     
     username = serializers.CharField()
     password = serializers.CharField(write_only=True)
     
     def validate(self, data):
-        """
-        Authenticate user and check if approved.
-        This runs when Flutter POST to /api/auth/login/
-        """
         username = data.get('username')
         password = data.get('password')
         
@@ -152,14 +104,7 @@ class LoginSerializer(serializers.Serializer):
         return data
 
 
-# ============================================================================
-# COURSE SERIALIZERS
-# ============================================================================
-
 class CourseSerializer(serializers.ModelSerializer):
-    """
-    Course data for Flutter.
-    """
     
     class Meta:
         model = Course
@@ -167,9 +112,6 @@ class CourseSerializer(serializers.ModelSerializer):
 
 
 class CourseCreateSerializer(serializers.ModelSerializer):
-    """
-    Used when admin creates courses.
-    """
     
     class Meta:
         model = Course
@@ -177,7 +119,6 @@ class CourseCreateSerializer(serializers.ModelSerializer):
 
 
 class ScheduleSessionSerializer(serializers.ModelSerializer):
-    """Specific time slot for a course"""
     assignment_id = serializers.PrimaryKeyRelatedField(
         queryset=CourseAssignment.objects.all(), source='assignment', write_only=True
     )
@@ -207,9 +148,6 @@ class ScheduleSessionSerializer(serializers.ModelSerializer):
         return obj.assignment.teacher.get_full_name() if obj.assignment and obj.assignment.teacher else None
 
 class CourseAssignmentSerializer(serializers.ModelSerializer):
-    """
-    The 'glue' that tells Flutter which teacher is teaching what to whom.
-    """
     teacher_name = serializers.CharField(source='teacher.get_full_name', read_only=True)
     course_name = serializers.CharField(source='course.name', read_only=True)
     course_code = serializers.CharField(source='course.code', read_only=True)
@@ -231,18 +169,6 @@ class CourseAssignmentSerializer(serializers.ModelSerializer):
 # ============================================================================
 
 class GroupSerializer(serializers.ModelSerializer):
-    """
-    Group information with student count.
-    
-    Flutter admin panel shows:
-    {
-        "id": 1,
-        "name": "IFA G1",
-        "academic_year": "2024-2025",
-        "student_count": 35,
-        "courses": [...]
-    }
-    """
     
     student_count = serializers.SerializerMethodField()
     courses = CourseSerializer(many=True, read_only=True)
@@ -261,24 +187,6 @@ class GroupSerializer(serializers.ModelSerializer):
 # ============================================================================
 
 class GradeSerializer(serializers.ModelSerializer):
-    """
-    Grade data for students and teachers.
-    
-    Flutter MarksScreen receives:
-    [
-        {
-            "id": 1,
-            "course_code": "DAM301",
-            "course_name": "Mobile Development",
-            "td_mark": 15.5,
-            "tp_mark": 16.0,
-            "exam_mark": 14.0,
-            "average": 15.17,
-            "comments": "Good progress"
-        },
-        ...
-    ]
-    """
     
     course_code = serializers.CharField(source='course.code', read_only=True)
     course_name = serializers.CharField(source='course.name', read_only=True)
@@ -298,17 +206,6 @@ class GradeSerializer(serializers.ModelSerializer):
 
 
 class GradeUpdateSerializer(serializers.ModelSerializer):
-    """
-    Used when teacher updates marks via Flutter StudentListScreen.
-    
-    Flutter sends:
-    {
-        "td_mark": 15.5,
-        "tp_mark": 16.0,
-        "exam_mark": 14.0,
-        "comments": "Good work"
-    }
-    """
     
     class Meta:
         model = Grade
@@ -320,9 +217,6 @@ class GradeUpdateSerializer(serializers.ModelSerializer):
 # ============================================================================
 
 class AttendanceSerializer(serializers.ModelSerializer):
-    """
-    Attendance records for teachers to mark and students to view.
-    """
     
     student_name = serializers.CharField(source='student.get_full_name', read_only=True)
     student_id = serializers.CharField(source='student.student_id', read_only=True)
@@ -342,23 +236,6 @@ class AttendanceSerializer(serializers.ModelSerializer):
 # ============================================================================
 
 class CourseFileSerializer(serializers.ModelSerializer):
-    """
-    Course files that teachers upload and students download.
-    
-    Flutter CourseFilesScreen receives:
-    [
-        {
-            "id": 1,
-            "title": "Lecture 1 - Introduction",
-            "description": "Course introduction slides",
-            "file": "http://server.com/media/course_files/lecture1.pdf",
-            "file_type": "LECTURE",
-            "uploaded_by_name": "Dr. Smith",
-            "created_at": "2025-01-01T10:00:00Z"
-        },
-        ...
-    ]
-    """
     
     uploaded_by_name = serializers.CharField(source='uploaded_by.get_full_name', read_only=True)
     course_code = serializers.CharField(source='course.code', read_only=True)
@@ -378,18 +255,6 @@ class CourseFileSerializer(serializers.ModelSerializer):
 # ============================================================================
 
 class TimetableSerializer(serializers.ModelSerializer):
-    """
-    Timetable images for students to view schedules.
-    
-    Flutter TimetableScreen receives:
-    {
-        "id": 1,
-        "title": "Spring 2025 Schedule",
-        "image": "http://server.com/media/timetables/schedule.jpg",
-        "semester": "Spring",
-        "academic_year": "2024-2025"
-    }
-    """
     
     group_name = serializers.CharField(source='group.name', read_only=True)
     
@@ -406,10 +271,6 @@ class TimetableSerializer(serializers.ModelSerializer):
 # ============================================================================
 
 class StudentDetailSerializer(serializers.ModelSerializer):
-    """
-    Detailed student info for admin management.
-    Includes related data like group and grades.
-    """
     
     group_name = serializers.SerializerMethodField()
     grade_count = serializers.SerializerMethodField()
@@ -432,9 +293,6 @@ class StudentDetailSerializer(serializers.ModelSerializer):
 
 
 class TeacherDetailSerializer(serializers.ModelSerializer):
-    """
-    Detailed teacher info showing assigned courses.
-    """
     
     courses = CourseAssignmentSerializer(source='teaching_assignments', many=True, read_only=True)
     course_count = serializers.SerializerMethodField()
@@ -456,18 +314,24 @@ class TeacherDetailSerializer(serializers.ModelSerializer):
 # ============================================================================
 
 class MessageSerializer(serializers.ModelSerializer):
-    """Serializer for P2P messages"""
-    sender_name = serializers.CharField(source='sender.get_full_name', read_only=True)
-    receiver_name = serializers.CharField(source='receiver.get_full_name', read_only=True)
+    sender_name = serializers.SerializerMethodField()
+    receiver_name = serializers.SerializerMethodField()
 
     class Meta:
         model = Message
         fields = ['id', 'sender', 'sender_name', 'receiver', 'receiver_name', 'content', 'timestamp', 'is_read']
         read_only_fields = ['sender', 'timestamp']
 
+    def get_sender_name(self, obj):
+        name = obj.sender.get_full_name().strip()
+        return name if name else obj.sender.username
+
+    def get_receiver_name(self, obj):
+        name = obj.receiver.get_full_name().strip()
+        return name if name else obj.receiver.username
+
 
 class NotificationSerializer(serializers.ModelSerializer):
-    """Serializer for system notifications"""
     class Meta:
         model = Notification
         fields = ['id', 'user', 'title', 'message', 'notification_type', 'created_at', 'is_read']

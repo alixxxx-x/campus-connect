@@ -5,6 +5,8 @@ import '../screens/courses_tab.dart';
 import '../screens/settings_tab.dart';
 import '../screens/user_management_tab.dart';
 import '../screens/schedule_tab.dart';
+import '../screens/admin_messages_tab.dart';
+import '../screens/admin_notifications_screen.dart';
 import '../screens/admin_style.dart'; // Import AdminStyle
 import '../providers/admin_providers.dart';
 import '../../../../shared/services/auth_service.dart';
@@ -23,7 +25,7 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 5, vsync: this, initialIndex: 0);
+    _tabController = TabController(length: 6, vsync: this, initialIndex: 0);
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         ref.read(adminTabProvider.notifier).state = _tabController.index;
@@ -61,6 +63,7 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen>
                     CoursesTab(),
                     UserManagementTab(),
                     ScheduleTab(),
+                    AdminMessagesTab(),
                     SettingsTab(),
                   ],
                 ),
@@ -133,7 +136,14 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen>
                 style: IconButton.styleFrom(
                   foregroundColor: AdminStyle.textSecondary,
                 ),
-                onPressed: () {},
+                onPressed: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => const AdminNotificationsScreen(),
+                    ),
+                  );
+                },
               ),
               const SizedBox(width: 8),
               GestureDetector(
@@ -193,15 +203,19 @@ class _AdminHomeScreenState extends ConsumerState<AdminHomeScreen>
           ],
           border: Border.all(color: Colors.grey.shade100),
         ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceAround,
-          children: [
-            _buildTabItem(0, Icons.bar_chart_rounded, 'Overview'),
-            _buildTabItem(1, Icons.school_rounded, 'Courses'),
-            _buildTabItem(2, Icons.people_rounded, 'Users'),
-            _buildTabItem(3, Icons.calendar_month_rounded, 'Schedule'),
-            _buildTabItem(4, Icons.settings_rounded, 'Settings'),
-          ],
+        child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _buildTabItem(0, Icons.bar_chart_rounded, 'Overview'),
+              _buildTabItem(1, Icons.school_rounded, 'Courses'),
+              _buildTabItem(2, Icons.people_rounded, 'Users'),
+              _buildTabItem(3, Icons.calendar_month_rounded, 'Schedule'),
+              _buildTabItem(4, Icons.chat_rounded, 'Messages'),
+              _buildTabItem(5, Icons.settings_rounded, 'Settings'),
+            ],
+          ),
         ),
       ),
     );

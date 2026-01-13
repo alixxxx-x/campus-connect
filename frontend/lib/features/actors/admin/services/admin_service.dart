@@ -408,4 +408,22 @@ class AdminService {
       throw Exception('Failed to delete schedule session');
     }
   }
+
+  // --- Notifications ---
+
+  Future<List<dynamic>> getNotifications() async {
+    final response = await _api.get('notifications/');
+    if (response.statusCode == 200) {
+      final decoded = json.decode(response.body);
+      return decoded is Map ? (decoded['results'] ?? []) : decoded;
+    }
+    throw Exception('Failed to load notifications');
+  }
+
+  Future<void> markNotificationAsRead(int id) async {
+    final response = await _api.post('notifications/$id/read/', {});
+    if (response.statusCode != 200) {
+      throw Exception('Failed to mark notification as read');
+    }
+  }
 }
