@@ -5,13 +5,22 @@ import '../../../../shared/services/api_client.dart';
 class StudentService {
   final ApiClient _api = ApiClient();
 
-  // GET MY GRADES - Connects to: GET /api/grades/my-grades/
+  // Helper to safely extract list from response
+  List<dynamic> _extractList(dynamic responseBody) {
+    if (responseBody is List) {
+      return responseBody;
+    } else if (responseBody is Map && responseBody.containsKey('results')) {
+      return responseBody['results'] as List<dynamic>;
+    }
+    return [];
+  }
+
+  // GET MY GRADES
   Future<List<dynamic>> getMyGrades() async {
     try {
       final response = await _api.get('/grades/my-grades/');
-
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return _extractList(jsonDecode(response.body));
       }
       return [];
     } catch (e) {
@@ -20,13 +29,26 @@ class StudentService {
     }
   }
 
-  // GET MY COURSES - Connects to: GET /api/courses/student-courses/
+  // GET MY ATTENDANCE
+  Future<List<dynamic>> getMyAttendance() async {
+    try {
+      final response = await _api.get('/attendance/my-attendance/');
+      if (response.statusCode == 200) {
+        return _extractList(jsonDecode(response.body));
+      }
+      return [];
+    } catch (e) {
+      debugPrint('Error fetching attendance: $e');
+      return [];
+    }
+  }
+
+  // GET MY COURSES
   Future<List<dynamic>> getMyCourses() async {
     try {
       final response = await _api.get('/courses/student-courses/');
-
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return _extractList(jsonDecode(response.body));
       }
       return [];
     } catch (e) {
@@ -35,11 +57,10 @@ class StudentService {
     }
   }
 
-  // GET MY TIMETABLE - Connects to: GET /api/timetables/my-timetable/
+  // GET TIMETABLE
   Future<Map<String, dynamic>?> getMyTimetable() async {
     try {
       final response = await _api.get('/timetables/my-timetable/');
-
       if (response.statusCode == 200) {
         return jsonDecode(response.body);
       }
@@ -50,18 +71,32 @@ class StudentService {
     }
   }
 
-  // GET COURSE FILES - Connects to: GET /api/files/?course_id=1
-  Future<List<dynamic>> getCourseFiles(int courseId) async {
+  // GET FILES
+  Future<List<dynamic>> getCourseFiles({int? courseId}) async {
     try {
-      final response = await _api.get('/files/?course_id=$courseId');
-
+      final url = courseId != null ? '/files/?course_id=$courseId' : '/files/';
+      final response = await _api.get(url);
       if (response.statusCode == 200) {
-        return jsonDecode(response.body);
+        return _extractList(jsonDecode(response.body));
       }
       return [];
     } catch (e) {
       debugPrint('Error fetching files: $e');
       return [];
+    }
+  }
+
+  // GET PROFILE
+  Future<Map<String, dynamic>?> getProfile() async {
+    try {
+      final response = await _api.get('/auth/profile/');
+      if (response.statusCode == 200) {
+        return jsonDecode(response.body);
+      }
+      return null;
+    } catch (e) {
+      debugPrint('Error fetching profile: $e');
+      return null;
     }
   }
 }

@@ -12,9 +12,6 @@ class AuthService {
 
   AuthService(this._ref, this._api);
 
-  // --- CORE AUTH METHODS ---
-
-  /// Login and update the auth state
   Future<String?> login({
     required String username,
     required String password,
@@ -34,15 +31,12 @@ class AuthService {
 
         final Map<String, dynamic> data = Map<String, dynamic>.from(decoded);
 
-        // Verify expected data exists and is not null
         if (data['access'] == null || data['user'] == null) {
           return 'Server response missing essential data (access/user)';
         }
 
-        // Save tokens locally
         await _saveAuthData(data);
 
-        // Update Riverpod state
         final userJson = data['user'];
         if (userJson != null && userJson is Map) {
           _ref.read(authProvider.notifier).state = AppUser.fromJson(
@@ -62,7 +56,6 @@ class AuthService {
     }
   }
 
-  /// Register a new student/teacher account
   Future<String?> register({
     required String username,
     required String email,
@@ -85,7 +78,7 @@ class AuthService {
       }, includeToken: false);
 
       if (response.statusCode == 201) {
-        return null; // Success
+        return null;
       } else {
         return _parseError(response.body);
       }
@@ -94,20 +87,16 @@ class AuthService {
     }
   }
 
-  /// Logout and clear storage
   Future<void> logout() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final refreshToken = prefs.getString('refresh_token');
 
-      // Optional: Inform backend (note: backend doesn't currently blacklist)
       if (refreshToken != null) {
         await _api.post('/auth/logout/', {'refresh': refreshToken});
       }
     } catch (_) {
-      // Ignore network errors on logout
     } finally {
-      // Always clear local state
       final prefs = await SharedPreferences.getInstance();
       await prefs.remove('access_token');
       await prefs.remove('refresh_token');
@@ -117,10 +106,8 @@ class AuthService {
     }
   }
 
-  /// Load user from storage if tokens exist (used on startup)
   Future<void> loadFromStorage() async {
     try {
-      // Optimization: Skip if already loaded
       if (_ref.read(authProvider) != null) return;
 
       final prefs = await SharedPreferences.getInstance();
@@ -137,11 +124,10 @@ class AuthService {
     } catch (e, stack) {
       debugPrint('AuthService: Error loading user from storage: $e');
       debugPrint(stack.toString());
-      await logout(); // Clear potentially corrupted data
+      await logout();
     }
   }
 
-  /// Fetch latest user profile from server
   Future<Map<String, dynamic>> getUserProfile() async {
     try {
       final response = await _api.get('/auth/profile/');
@@ -154,8 +140,6 @@ class AuthService {
       return {'success': false, 'error': e.toString()};
     }
   }
-
-  // --- PRIVATE HELPERS ---
 
   Future<void> _saveAuthData(Map<String, dynamic> data) async {
     final prefs = await SharedPreferences.getInstance();
@@ -173,7 +157,8 @@ class AuthService {
         }
         if (errorData.containsKey('detail')) return errorData['detail'];
 
-        // Return first validation error found
+        if (errorData.containsKey('detail')) return errorData['detail'];
+
         final String firstKey = errorData.keys.first;
         final dynamic val = errorData[firstKey];
         if (val is List) return '$firstKey: ${val[0]}';
@@ -184,7 +169,6 @@ class AuthService {
   }
 }
 
-/// Provider for the AuthService (Unified)
 final authServiceProvider = Provider<AuthService>((ref) {
   final api = ref.watch(apiClientProvider);
   return AuthService(ref, api);

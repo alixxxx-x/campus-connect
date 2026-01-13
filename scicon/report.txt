@@ -1,0 +1,193 @@
+# Comprehensive Project Report
+
+## 1. Project Overview
+**Campus Connect** is a full-stack educational management system consisting of a **Django (Python)** backend and a **Flutter (Dart)** mobile frontend. The system manages students, teachers, courses, grades, attendance, and internal messaging.
+
+---
+
+## 2. Project Structure
+
+### Backend (`/backend`)
+Allows API access to the database and business logic.
+```
+backend/
+├── api/                    # Main application app
+│   ├── migrations/         # Database migrations
+│   ├── management/         # Custom commands (seed_db)
+│   ├── models.py           # Database Schema (User, Course, Grade...)
+│   ├── serializers.py      # JSON conversion
+│   ├── views.py            # API Controllers
+│   ├── urls.py             # API Routing
+│   └── permissions.py      # Role-based access control
+├── backend/                # Project configuration
+│   ├── settings.py         # Config (Apps, DB, JWT, CORS)
+│   └── urls.py             # Main routing
+├── media/                  # Uploaded files
+├── staticfiles/            # Static assets
+├── requirements.txt        # Python dependencies
+└── manage.py               # Entry point
+```
+
+### Frontend (`/frontend`)
+Mobile application for Students, Teachers, and Admins.
+```
+frontend/
+├── android/, ios/, web/    # Platform-specific code
+├── assets/                 # Images and fonts
+├── lib/
+│   ├── features/           # Feature-based architecture
+│   │   ├── actors/         # Role-specific screens
+│   │   │   ├── admin/      # Admin dashboards & management
+│   │   │   ├── student/    # Student viewing grades, courses
+│   │   │   └── teacher/    # Teacher grading, attendance
+│   │   └── authentication/ # Login/Register screens
+│   ├── shared/             # Shared resources
+│   │   ├── services/       # API Services (auth, messaging)
+│   │   ├── providers/      # Riverpod state providers
+│   │   └── widgets/        # Reusable UI components
+│   ├── app.dart            # Root widget
+│   └── main.dart           # Entry point
+└── pubspec.yaml            # Dart dependencies
+```
+
+---
+
+## 3. Technology Stack & Tools
+
+### Backend (Django)
+*   **Framework:** Django 5.x + Django REST Framework
+*   **Database:** PostgreSQL (Production-ready relational DB)
+*   **Authentication:** `rest_framework_simplejwt` (JWT Tokens)
+*   **CORS:** `django-cors-headers` (Frontend communication)
+*   **Imaging:** `Pillow` (Image processing)
+*   **Filtering:** `django-filter` (Query parameters)
+
+### Frontend (Flutter)
+*   **Framework:** Flutter (Cross-platform UI)
+*   **State Management:** `flutter_riverpod` (Reactive state)
+*   **Networking:** `http` (API requests)
+*   **Local Storage:** `shared_preferences` (Token persistence)
+*   **File Handling:** `file_picker`, `image_picker`
+*   **Typography:** `google_fonts`
+*   **Date Formatting:** `intl`
+
+---
+
+## 4. Code Strategies & Design
+
+### Backend Strategies
+1.  **Custom User Model:**
+    *   Inherits from `AbstractUser`.
+    *   Adds `role` field (`ADMIN`, `TEACHER`, `STUDENT`).
+    *   Centralizes auth logic in `api.models.User`.
+2.  **Role-Based Access Control (RBAC):**
+    *   Custom permission classes in `permissions.py` (e.g., `IsTeacher`, `IsAdmin`).
+    *   Views enforce permissions: `permission_classes = [IsTeacher]`.
+3.  **Database Relationship Logic:**
+    *   **ManyToMany** through intermediaries: `CourseAssignment` links `Teacher` to `Course` and `Group`.
+    *   **Foreign Keys**: Grades and Attendance link to specific Students and Courses.
+4.  **Seeding:**
+    *   `management/commands/seed_db.py` allows rapid environment reset with realistic dummy data.
+
+### Frontend Strategies
+1.  **Layered Architecture:**
+    *   **Screens (UI):** Display data, handle user taps.
+    *   **Providers (State):** Bridge UI and Services, caching data.
+    *   **Services (Logic):** Pure Dart classes handling API calls (`TeacherService`, `AuthService`).
+2.  **Centralized Networking (`ApiClient`):**
+    *   Singleton-like provider `apiClientProvider`.
+    *   **Auto-Interceptor:** Automatically adds `Authorization: Bearer <token>` to requests.
+    *   **Auto-Refresh:** Intercepts 401 errors, calls `/api/auth/refresh/`, updates storage, and retries the original request seamlessly.
+3.  **State Management (Riverpod):**
+    *   `FutureProvider`: For async data fetching (users, grades).
+    *   `StateProvider`: For simple UI state (loading, filters).
+    *   `ref.watch`: UI rebuilds automatically when data changes.
+
+---
+
+## 5. Backend-Frontend Linking
+
+### Connection Details
+*   **Base URL:** `http://localhost:8000/api/` (Handles Android emulator `10.0.2.2` special case).
+*   **Protocol:** JSON REST API.
+
+### Authentication Flow
+1.  **Login:** Frontend sends `username`/`password` to `/auth/login/`.
+2.  **Token Receipt:** Backend validates and returns `access` and `refresh` JWTs.
+3.  **Storage:** Frontend saves tokens in `SharedPreferences`.
+4.  **Session:** `ApiClient` retrieves `access_token` for every subsequent request.
+5.  **Logout:** Frontend clears storage; optionally notifies backend to blacklist token.
+
+---
+
+## 6. API Endpoints & Permissions (Summary)
+
+### Public
+*   `POST /auth/login/` - Login
+*   `POST /auth/register/` - Student Registration
+
+### Authenticated (All Roles)
+*   `GET /auth/profile/` - Get own profile
+*   `GET /users/search/` - Search users for messaging
+
+### Admin Only
+*   `GET/POST /admin/teachers/` - Manage Teachers
+*   `GET/DELETE /admin/students/` - Manage Students
+*   `POST /groups/`, `/courses/` - Create structural data
+*   `POST /courses/assign-to-group/` - Link Course-Group
+*   `POST /admin/assignments/` - Link Teacher-Course
+
+### Teacher Only
+*   `GET /courses/my-courses/` - Assigned courses
+*   `GET/POST /grades/` - Manage grades
+*   `GET/POST /attendance/` - Manage attendance
+
+### Student Only
+*   `GET /courses/student-courses/` - Enrolled courses
+*   `GET /grades/my-grades/` - View own marks
+*   `GET /attendance/my-attendance/` - View own attendance
+
+---
+
+## 7. Key Code Snippets
+
+### Frontend: Auto-Refresh Logic (`api_client.dart`)
+```dart
+// Auto-refresh on 401 and retry once
+if (response.statusCode == 401 && includeToken) {
+  final refreshed = await _refreshToken();
+  if (refreshed) {
+    token = await _getToken();
+    response = await http.get(Uri.parse(url), headers: {...});
+  }
+}
+```
+
+### Backend: Role Permission (`permissions.py`)
+```python
+class IsTeacher(permissions.BasePermission):
+    def has_permission(self, request, view):
+        return request.user.is_authenticated and request.user.role == 'TEACHER'
+```
+
+### Linking: Model Serialization
+**Django (`serializers.py`)**:
+```python
+class UserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'role', 'first_name', 'last_name']
+```
+
+**Flutter (`user_model.dart`)**:
+```dart
+factory AppUser.fromJson(Map<String, dynamic> json) {
+  return AppUser(
+    id: json['id'],
+    username: json['username'],
+    role: json['role'],
+    firstName: json['first_name'], // Maps snake_case to camelCase
+    lastName: json['last_name'],
+  );
+}
+```

@@ -1,419 +1,196 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:intl/intl.dart';
+import '../services/student_service.dart';
+import '../../../../shared/providers/auth_provider.dart';
 
-// ==================== Models ====================
+// ==================== Data Models ====================
+
 class StudentProfile {
-  final String id;
-  final String name;
-  final String email;
-  final String studentId;
-  final String program;
-  final String group;
-  final int semester;
-  final String phone;
-  final String address;
-  final DateTime? birthDate;
-  final String? profileImage;
-  final List<EmergencyContact> emergencyContacts;
+  final int id;
+  final String username;
+  final String firstName;
+  final String lastName;
+  final String role;
+  final String? studentId;
+  final String? program;
+  final String? groupName;
 
   StudentProfile({
     required this.id,
-    required this.name,
-    required this.email,
-    required this.studentId,
-    required this.program,
-    required this.group,
-    required this.semester,
-    required this.phone,
-    required this.address,
-    this.birthDate,
-    this.profileImage,
-    this.emergencyContacts = const [],
+    required this.username,
+    required this.firstName,
+    required this.lastName,
+    required this.role,
+    this.studentId,
+    this.program,
+    this.groupName,
   });
 
-  StudentProfile copyWith({
-    String? name,
-    String? email,
-    String? phone,
-    String? address,
-    String? profileImage,
-    List<EmergencyContact>? emergencyContacts,
-  }) {
+  String get fullName => '$firstName $lastName'.trim();
+
+  factory StudentProfile.fromJson(Map<String, dynamic> json) {
     return StudentProfile(
-      id: id,
-      name: name ?? this.name,
-      email: email ?? this.email,
-      studentId: studentId,
-      program: program,
-      group: group,
-      semester: semester,
-      phone: phone ?? this.phone,
-      address: address ?? this.address,
-      birthDate: birthDate,
-      profileImage: profileImage ?? this.profileImage,
-      emergencyContacts: emergencyContacts ?? this.emergencyContacts,
+      id: json['id'] is int
+          ? json['id']
+          : int.tryParse(json['id'].toString()) ?? 0,
+      username: json['username'] ?? '',
+      firstName: json['first_name'] ?? '',
+      lastName: json['last_name'] ?? '',
+      role: json['role'] ?? 'STUDENT',
+      studentId: json['student_id'],
+      program: json['program'],
+      groupName: json['group_name'],
     );
   }
 }
 
-class EmergencyContact {
-  final String name;
-  final String relationship;
-  final String phone;
-
-  EmergencyContact({
-    required this.name,
-    required this.relationship,
-    required this.phone,
-  });
-}
-
-class ScheduleEvent {
-  final String id;
-  final String courseName;
+class Grade {
   final String courseCode;
-  final String teacher;
-  final String room;
-  final DateTime startTime;
-  final DateTime endTime;
-  final String day;
-  final String type; // 'lecture', 'lab', 'tutorial'
-
-  ScheduleEvent({
-    required this.id,
-    required this.courseName,
-    required this.courseCode,
-    required this.teacher,
-    required this.room,
-    required this.startTime,
-    required this.endTime,
-    required this.day,
-    required this.type,
-  });
-}
-
-class CourseMark {
-  final String courseId;
   final String courseName;
-  final String courseCode;
-  final Map<String, double> assessments; // assessment name -> score
-  final double totalScore;
-  final String grade;
-  final double classAverage;
-  final int rank;
+  final double? tdMark;
+  final double? tpMark;
+  final double? examMark;
+  final double? average;
 
-  CourseMark({
-    required this.courseId,
-    required this.courseName,
+  Grade({
     required this.courseCode,
-    required this.assessments,
-    required this.totalScore,
-    required this.grade,
-    required this.classAverage,
-    required this.rank,
+    required this.courseName,
+    this.tdMark,
+    this.tpMark,
+    this.examMark,
+    this.average,
   });
+
+  factory Grade.fromJson(Map<String, dynamic> json) {
+    return Grade(
+      courseCode: json['course_code'] ?? '',
+      courseName: json['course_name'] ?? '',
+      tdMark: json['td_mark'] != null
+          ? double.tryParse(json['td_mark'].toString())
+          : null,
+      tpMark: json['tp_mark'] != null
+          ? double.tryParse(json['tp_mark'].toString())
+          : null,
+      examMark: json['exam_mark'] != null
+          ? double.tryParse(json['exam_mark'].toString())
+          : null,
+      average: json['average'] != null
+          ? double.tryParse(json['average'].toString())
+          : null,
+    );
+  }
 }
 
 class AttendanceRecord {
-  final String courseId;
-  final String courseName;
-  final int present;
-  final int absent;
-  final int late;
-  final int total;
-  final double percentage;
+  final String status;
 
-  AttendanceRecord({
-    required this.courseId,
-    required this.courseName,
-    required this.present,
-    required this.absent,
-    required this.late,
-    required this.total,
-    required this.percentage,
-  });
+  AttendanceRecord({required this.status});
+
+  factory AttendanceRecord.fromJson(Map<String, dynamic> json) {
+    return AttendanceRecord(status: json['status'] ?? 'PRESENT');
+  }
 }
 
-// ==================== Riverpod Providers ====================
+class ScheduleSession {
+  final int id;
+  final String day;
+  final String startTime;
+  final String endTime;
+  final String room;
+  final String type;
 
-// Provider for student profile
-final studentProfileProvider = AsyncNotifierProvider<StudentProfileNotifier, StudentProfile?>(
-      () => StudentProfileNotifier(),
-);
+  ScheduleSession({
+    required this.id,
+    required this.day,
+    required this.startTime,
+    required this.endTime,
+    required this.room,
+    required this.type,
+  });
 
-class StudentProfileNotifier extends AsyncNotifier<StudentProfile?> {
-  @override
-  Future<StudentProfile?> build() async {
-    return await _fetchProfile();
-  }
-
-  Future<StudentProfile> _fetchProfile() async {
-    // TODO: Backend - GET /api/student/profile
-    await Future.delayed(const Duration(seconds: 1));
-    return StudentProfile(
-      id: 'STU001',
-      name: 'John Doe',
-      email: 'john.doe@university.edu',
-      studentId: '20230001',
-      program: 'Computer Science',
-      group: 'CS-101-A',
-      semester: 3,
-      phone: '+1 (555) 123-4567',
-      address: '123 University Ave, Campus City',
-      birthDate: DateTime(2001, 5, 15),
-      profileImage: null,
-      emergencyContacts: [
-        EmergencyContact(
-          name: 'Jane Doe',
-          relationship: 'Mother',
-          phone: '+1 (555) 987-6543',
-        ),
-        EmergencyContact(
-          name: 'Robert Doe',
-          relationship: 'Father',
-          phone: '+1 (555) 456-7890',
-        ),
-      ],
+  factory ScheduleSession.fromJson(Map<String, dynamic> json) {
+    return ScheduleSession(
+      id: json['id'] is int ? json['id'] : 0,
+      day: json['day'] ?? 'MONDAY',
+      startTime: json['start_time'] ?? '00:00:00',
+      endTime: json['end_time'] ?? '00:00:00',
+      room: json['room'] ?? 'N/A',
+      type: json['session_type'] ?? 'LECTURE',
     );
   }
 
-  Future<void> updateProfile(StudentProfile updatedProfile) async {
-    state = const AsyncLoading<StudentProfile?>();
-    try {
-      // TODO: Backend - PUT /api/student/profile
-      await Future.delayed(const Duration(seconds: 1));
-      state = AsyncData<StudentProfile?>(updatedProfile);
+  // Helper to format time (08:30:00 -> 08:30)
+  String get formattedStartTime => startTime.split(':').take(2).join(':');
+  String get formattedEndTime => endTime.split(':').take(2).join(':');
+}
 
-      // Show success message (handled in UI)
-    } catch (e, stackTrace) {
-      state = AsyncError<StudentProfile?>(e, stackTrace);
-    }
+class CourseAssignment {
+  final int id;
+  final String courseCode;
+  final String courseName;
+  final String teacherName;
+  final List<ScheduleSession> sessions;
+
+  CourseAssignment({
+    required this.id,
+    required this.courseCode,
+    required this.courseName,
+    required this.teacherName,
+    required this.sessions,
+  });
+
+  factory CourseAssignment.fromJson(Map<String, dynamic> json) {
+    var sessionList = json['sessions'] as List? ?? [];
+    return CourseAssignment(
+      id: json['id'],
+      courseCode: json['course_code'] ?? '',
+      courseName: json['course_name'] ?? '',
+      teacherName: json['teacher_name'] ?? 'Unknown Teacher',
+      sessions: sessionList
+          .map((s) => ScheduleSession.fromJson(s as Map<String, dynamic>))
+          .toList(),
+    );
   }
 }
 
-// Provider for student schedule
-final studentScheduleProvider = AsyncNotifierProvider<StudentScheduleNotifier, List<ScheduleEvent>>(
-      () => StudentScheduleNotifier(),
-);
+// ==================== Providers ====================
 
-class StudentScheduleNotifier extends AsyncNotifier<List<ScheduleEvent>> {
-  @override
-  Future<List<ScheduleEvent>> build() async {
-    return await _fetchSchedule();
+final studentServiceProvider = Provider((ref) => StudentService());
+
+final studentProfileProvider = Provider<StudentProfile?>((ref) {
+  final appUser = ref.watch(authProvider);
+  if (appUser == null) {
+    return null;
   }
+  return StudentProfile.fromJson(appUser.toJson());
+});
 
-  Future<List<ScheduleEvent>> _fetchSchedule() async {
-    // TODO: Backend - GET /api/student/schedule
-    await Future.delayed(const Duration(seconds: 1));
+final studentGradesProvider = FutureProvider<List<Grade>>((ref) async {
+  final service = ref.read(studentServiceProvider);
+  final data = await service.getMyGrades();
+  return data.map((json) => Grade.fromJson(json)).toList();
+});
 
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
+final studentAttendanceProvider = FutureProvider<List<AttendanceRecord>>((
+  ref,
+) async {
+  final service = ref.read(studentServiceProvider);
+  final data = await service.getMyAttendance();
+  return data.map((json) => AttendanceRecord.fromJson(json)).toList();
+});
 
-    return [
-      ScheduleEvent(
-        id: '1',
-        courseName: 'Data Structures',
-        courseCode: 'CS201',
-        teacher: 'Dr. Smith',
-        room: 'Room 301',
-        startTime: today.add(const Duration(hours: 9)),
-        endTime: today.add(const Duration(hours: 10, minutes: 30)),
-        day: 'Monday',
-        type: 'lecture',
-      ),
-      ScheduleEvent(
-        id: '2',
-        courseName: 'Algorithms',
-        courseCode: 'CS202',
-        teacher: 'Dr. Johnson',
-        room: 'Lab 105',
-        startTime: today.add(const Duration(hours: 11)),
-        endTime: today.add(const Duration(hours: 12, minutes: 30)),
-        day: 'Monday',
-        type: 'lab',
-      ),
-      ScheduleEvent(
-        id: '3',
-        courseName: 'Database Systems',
-        courseCode: 'CS203',
-        teacher: 'Dr. Williams',
-        room: 'Room 205',
-        startTime: today.add(const Duration(hours: 14)),
-        endTime: today.add(const Duration(hours: 15, minutes: 30)),
-        day: 'Tuesday',
-        type: 'lecture',
-      ),
-      ScheduleEvent(
-        id: '4',
-        courseName: 'Software Engineering',
-        courseCode: 'CS204',
-        teacher: 'Dr. Brown',
-        room: 'Room 302',
-        startTime: today.add(const Duration(hours: 10)),
-        endTime: today.add(const Duration(hours: 11, minutes: 30)),
-        day: 'Wednesday',
-        type: 'lecture',
-      ),
-      ScheduleEvent(
-        id: '5',
-        courseName: 'Computer Networks',
-        courseCode: 'CS205',
-        teacher: 'Dr. Davis',
-        room: 'Lab 110',
-        startTime: today.add(const Duration(hours: 13)),
-        endTime: today.add(const Duration(hours: 15)),
-        day: 'Thursday',
-        type: 'lab',
-      ),
-    ];
-  }
+final studentCoursesProvider = FutureProvider<List<CourseAssignment>>((
+  ref,
+) async {
+  final service = ref.read(studentServiceProvider);
+  final data = await service.getMyCourses();
+  return data.map((json) => CourseAssignment.fromJson(json)).toList();
+});
 
-  Future<List<ScheduleEvent>> getTodaySchedule() async {
-    final schedule = state.value ?? [];
-    final today = DateTime.now();
-    final dayName = DateFormat('EEEE').format(today);
-
-    return schedule.where((event) => event.day == dayName).toList();
-  }
-
-  Future<List<ScheduleEvent>> getWeekSchedule() async {
-    final schedule = state.value ?? [];
-    return schedule;
-  }
-}
-
-// Provider for student marks
-final studentMarksProvider = AsyncNotifierProvider<StudentMarksNotifier, List<CourseMark>>(
-      () => StudentMarksNotifier(),
-);
-
-class StudentMarksNotifier extends AsyncNotifier<List<CourseMark>> {
-  @override
-  Future<List<CourseMark>> build() async {
-    return await _fetchMarks();
-  }
-
-  Future<List<CourseMark>> _fetchMarks() async {
-    // TODO: Backend - GET /api/student/marks
-    await Future.delayed(const Duration(seconds: 1));
-
-    return [
-      CourseMark(
-        courseId: '1',
-        courseName: 'Data Structures',
-        courseCode: 'CS201',
-        assessments: {
-          'Quiz 1': 18.0,
-          'Midterm': 85.0,
-          'Assignment 1': 90.0,
-          'Quiz 2': 20.0,
-          'Final': 88.0,
-        },
-        totalScore: 87.5,
-        grade: 'A',
-        classAverage: 78.3,
-        rank: 5,
-      ),
-      CourseMark(
-        courseId: '2',
-        courseName: 'Algorithms',
-        courseCode: 'CS202',
-        assessments: {
-          'Quiz 1': 17.0,
-          'Midterm': 82.0,
-          'Assignment 1': 88.0,
-          'Final': 85.0,
-        },
-        totalScore: 84.0,
-        grade: 'B+',
-        classAverage: 75.6,
-        rank: 8,
-      ),
-      CourseMark(
-        courseId: '3',
-        courseName: 'Database Systems',
-        courseCode: 'CS203',
-        assessments: {
-          'Quiz 1': 19.0,
-          'Midterm': 90.0,
-          'Project': 95.0,
-          'Final': 92.0,
-        },
-        totalScore: 91.5,
-        grade: 'A',
-        classAverage: 82.1,
-        rank: 2,
-      ),
-      CourseMark(
-        courseId: '4',
-        courseName: 'Software Engineering',
-        courseCode: 'CS204',
-        assessments: {
-          'Midterm': 78.0,
-          'Project': 85.0,
-          'Final': 80.0,
-        },
-        totalScore: 81.0,
-        grade: 'B',
-        classAverage: 76.8,
-        rank: 12,
-      ),
-    ];
-  }
-}
-
-// Provider for student attendance
-final studentAttendanceProvider = AsyncNotifierProvider<StudentAttendanceNotifier, List<AttendanceRecord>>(
-      () => StudentAttendanceNotifier(),
-);
-
-class StudentAttendanceNotifier extends AsyncNotifier<List<AttendanceRecord>> {
-  @override
-  Future<List<AttendanceRecord>> build() async {
-    return await _fetchAttendance();
-  }
-
-  Future<List<AttendanceRecord>> _fetchAttendance() async {
-    // TODO: Backend - GET /api/student/attendance
-    await Future.delayed(const Duration(seconds: 1));
-
-    return [
-      AttendanceRecord(
-        courseId: '1',
-        courseName: 'Data Structures',
-        present: 28,
-        absent: 2,
-        late: 1,
-        total: 31,
-        percentage: 90.3,
-      ),
-      AttendanceRecord(
-        courseId: '2',
-        courseName: 'Algorithms',
-        present: 30,
-        absent: 0,
-        late: 1,
-        total: 31,
-        percentage: 96.8,
-      ),
-      AttendanceRecord(
-        courseId: '3',
-        courseName: 'Database Systems',
-        present: 29,
-        absent: 1,
-        late: 1,
-        total: 31,
-        percentage: 93.5,
-      ),
-      AttendanceRecord(
-        courseId: '4',
-        courseName: 'Software Engineering',
-        present: 27,
-        absent: 3,
-        late: 1,
-        total: 31,
-        percentage: 87.1,
-      ),
-    ];
-  }
-}
+final studentFreshProfileProvider = FutureProvider<StudentProfile?>((
+  ref,
+) async {
+  final service = ref.read(studentServiceProvider);
+  final json = await service.getProfile();
+  if (json == null) return null;
+  return StudentProfile.fromJson(json);
+});
